@@ -13,7 +13,7 @@ block_chain_practice_20201500/
 ├── steps.md
 ├── index.html
 └── scripts/
-    └── fetch_prices.py
+    └── fetch_prices.py # 실습3번을 위한 파일
 ```
 ## File Descriptions
 
