@@ -1,4 +1,5 @@
 # block_chain_practice_20201500
+20201500 최진우 블록체인실습 1주차 실습입니다.
 
 # This repository contains:
 - GitHub Pages homepage
