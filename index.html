@@ -2,10 +2,78 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>My GitHub Website</title>
+  <title>Live BTC & ETH Prices (KRW)</title>
+  <style>
+    body {
+      font-family: Arial;
+      max-width: 700px;
+      margin: 40px auto;
+      text-align: center;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello GitHub Pages!</h1>
-  <p>This is my blockchain practice website.</p>
+
+<h1>Live Bitcoin & Ethereum Prices (KRW)</h1>
+
+<table>
+  <tr>
+    <th>Coin</th>
+    <th>Price (KRW)</th>
+  </tr>
+  <tr>
+    <td>Bitcoin (BTC)</td>
+    <td id="btc">Loading...</td>
+  </tr>
+  <tr>
+    <td>Ethereum (ETH)</td>
+    <td id="eth">Loading...</td>
+  </tr>
+</table>
+
+<p>Last updated: <span id="updated">-</span></p>
+
+<script>
+const endpoint =
+"https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=krw";
+
+function formatKRW(value) {
+  return "₩" + value.toLocaleString("ko-KR");
+}
+
+async function updatePrices() {
+  try {
+    const response = await fetch(endpoint);
+    const data = await response.json();
+
+    document.getElementById("btc").innerText =
+      formatKRW(data.bitcoin.krw);
+
+    document.getElementById("eth").innerText =
+      formatKRW(data.ethereum.krw);
+
+    document.getElementById("updated").innerText =
+      new Date().toLocaleString();
+  } catch (error) {
+    console.error("Error fetching prices:", error);
+  }
+}
+
+updatePrices();
+setInterval(updatePrices, 10000); // 10초마다 자동 갱신
+</script>
+
 </body>
 </html>
