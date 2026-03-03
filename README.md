@@ -7,13 +7,14 @@
 - CoinGecko API integration
 
 # Overall Structures : 
+```
 block_chain_practice_20201500/
 ├── README.md
 ├── steps.md
 ├── index.html
 └── scripts/
     └── fetch_prices.py
-
+```
 ## File Descriptions
 
 | File | Language | Purpose | When It Runs | API Usage | Output |
