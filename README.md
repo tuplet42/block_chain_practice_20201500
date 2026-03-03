@@ -6,5 +6,12 @@ This repository contains:
 - CoinGecko API integration
 
 <!-- PRICE_TABLE_START -->
-(여기는 스크립트가 자동으로 채웁니다)
+## Today's Prices (KRW)
+
+_Last updated: 2026-03-03 07:34_
+
+| Coin | Price (KRW) |
+|------|-------------|
+| Bitcoin (BTC) | ₩99,970,726 |
+| Ethereum (ETH) | ₩2,931,210 |
 <!-- PRICE_TABLE_END -->
