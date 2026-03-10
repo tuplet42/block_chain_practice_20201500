@@ -40,8 +40,19 @@ Create a `.env` file in the project root directory and add your Infura API key.
 Sign in for Infura is necessary to get API key if you didn't sign up.
 
 ## How to Run Each Program
-node json-rpc/index.js
+press these commands below : 
+1. node json-rpc/index.js
 : This program directly sends JSON-RPC requests to the Ethereum network using Infura.
+running example
+=== JSON-RPC version ===
+Latest block number: 24625783
+Transaction count in latest block: 402
 
-node ethers/index.js
+3. node ethers/index.js
 : This program uses the ethers.js library to retrieve the latest block number and the number of transactions in the latest block.
+running example
+=== ethers.js version ===
+Latest block number: 24625785
+Transaction count in latest block: 516
+
+
