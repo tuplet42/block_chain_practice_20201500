@@ -15,6 +15,7 @@ The goal of this project is to compare low-level JSON-RPC calls with a higher-le
 ---
 
 ## Project Structure
+```
 week2
 ├─ ethers
 │ └─ index.js
@@ -26,6 +27,7 @@ week2
 ├─ .gitignore
 ├─ package.json
 └─ package-lock.json
+```
 
 ## Install Dependences
 1. Install Node.js if it is not installed.
