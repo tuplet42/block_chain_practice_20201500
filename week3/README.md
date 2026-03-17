@@ -22,11 +22,11 @@ week3
 ## Before running the html
 1. 사용하는 브라우저에 MetaMask extension을 다운받는다.
 2. 계정을 생성해서 지갑을 만든다.
-3. 기본 브라우저를 extension으로 다운받은 브라우저로 설정한다. 그렇지 않으면 html 실행 시 metamask가 연결되지 않는 문제가 발생한다.
+3. 기본 브라우저를 extension으로 다운받은 브라우저로 설정한다. 그렇지 않으면 html 실행 시 MetaMask가 연결되지 않는 문제가 발생한다.
 4. 지갑에 로그인한 상태라면 오른쪽 의 3개줄 버튼을 누르고 Manage -> Network -> 사용자 지정 네트워크 추가
    로 Base Sepolia, GIWA Sepolia를 추가한다. (이미 테스트 네트워크에 Sepolia는 있을 것이다. 만약 없다면 추가를 추천한다.)
 5. 지갑 주소를 입력해서 3개 네트워크의 faucet을 받는다.
-   (필자는 Spolia만 받아져서 다음의 주소로 받았다. https://cloud.google.com/application/web3/faucet/ethereum/sepolia)
+   (필자는 Sepolia만 받아져서 다음의 주소로 받았다. https://cloud.google.com/application/web3/faucet/ethereum/sepolia)
 6. faucet을 받았으면 01-connect_wallet.html html을 실행한 상태로 MetaMask 연결을 누른다. 
 7. 실행 완료 시 02-send_eht.html을 실행시킨다. 상대의 지갑 주소와 보낼 금액을 입력하고 송금을 실행 시 완료되었다는 메시지와 함께 Nonce가 올라갈 것이다.
 
