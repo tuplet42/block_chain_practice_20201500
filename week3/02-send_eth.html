@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blockchain Lab #3</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <header class="mb-8">
+      <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <h1 class="text-3xl md:text-4xl font-bold tracking-tight">Blockchain Lab #3</h1>
+          <p class="text-gray-400 mt-2">MetaMask 지갑 연결 후 주소, ETH 잔액, Nonce를 확인하고 ETH를 송금하세요.</p>
+        </div>
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-gray-700 bg-gray-800">
+          <span id="statusDot" class="w-3 h-3 rounded-full bg-gray-500"></span>
+          <span id="statusText" class="text-sm font-medium">미연결</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <!-- Card 1: 지갑 연결 -->
+      <section class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-start justify-between gap-4 mb-6">
+          <div>
+            <h2 class="text-xl font-semibold">지갑 연결</h2>
+            <p class="text-sm text-gray-400 mt-1">MetaMask와 연결해 계정 상태를 불러옵니다.</p>
+          </div>
+        </div>
+
+        <button
+          id="connectBtn"
+          class="w-full sm:w-auto px-5 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition font-semibold"
+        >
+          MetaMask 연결
+        </button>
+
+        <div id="metamaskWarning" class="hidden mt-4 rounded-xl border border-yellow-500/40 bg-yellow-500/10 text-yellow-300 px-4 py-3 text-sm">
+          MetaMask가 설치되어 있지 않습니다. 브라우저 확장 프로그램을 설치한 뒤 다시 시도하세요.
+        </div>
+
+        <div id="errorBox" class="hidden mt-4 rounded-xl border border-red-500/40 bg-red-500/10 text-red-300 px-4 py-3 text-sm"></div>
+
+        <div id="faucetWarning" class="hidden mt-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-300 px-4 py-3 text-sm">
+          Faucet에서 ETH를 받아오세요.
+        </div>
+
+        <div id="walletInfo" class="hidden mt-6 space-y-4">
+          <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
+            <p class="text-sm text-gray-400 mb-1">지갑 주소</p>
+            <p id="address" class="font-mono text-sm break-all text-gray-100">-</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
+              <p class="text-sm text-gray-400 mb-1">ETH 잔액</p>
+              <p id="balance" class="text-lg font-semibold">-</p>
+            </div>
+            <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
+              <p class="text-sm text-gray-400 mb-1">현재 Nonce</p>
+              <p id="nonce" class="text-lg font-semibold">-</p>
+            </div>
+            <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
+              <p class="text-sm text-gray-400 mb-1">네트워크</p>
+              <p id="network" class="text-lg font-semibold">-</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 2: ETH 송금 -->
+      <section class="bg-gray-800 border border-gray-700 rounded-2xl p-6 shadow-lg">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold">ETH 송금</h2>
+          <p class="text-sm text-gray-400 mt-1">친구 주소와 금액을 입력하고 ETH를 전송합니다.</p>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label for="toAddress" class="block text-sm text-gray-300 mb-2">받는 주소</label>
+            <input
+              id="toAddress"
+              type="text"
+              placeholder="0x..."
+              class="w-full rounded-xl bg-gray-900/60 border border-gray-700 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="sendAmount" class="block text-sm text-gray-300 mb-2">보낼 금액 (ETH)</label>
+            <input
+              id="sendAmount"
+              type="number"
+              step="0.000001"
+              value="0.001"
+              class="w-full rounded-xl bg-gray-900/60 border border-gray-700 px-4 py-3 text-sm outline-none focus:border-indigo-500"
+            />
+          </div>
+
+          <button
+            id="sendBtn"
+            disabled
+            class="w-full px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-600 disabled:cursor-not-allowed transition font-semibold"
+          >
+            송금 실행
+          </button>
+        </div>
+
+        <div id="txLoading" class="hidden mt-4 rounded-xl border border-blue-500/40 bg-blue-500/10 text-blue-300 px-4 py-3 text-sm">
+          트랜잭션 처리 중...
+        </div>
+
+        <div id="txError" class="hidden mt-4 rounded-xl border border-red-500/40 bg-red-500/10 text-red-300 px-4 py-3 text-sm"></div>
+
+        <div id="txResult" class="hidden mt-6 space-y-4">
+          <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
+            <p class="text-sm text-gray-400 mb-1">TX Hash</p>
+            <p id="txHash" class="font-mono text-sm break-all text-gray-100">-</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
+              <p class="text-sm text-gray-400 mb-1">Nonce</p>
+              <p id="txNonce" class="text-lg font-semibold">-</p>
+            </div>
+            <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
+              <p class="text-sm text-gray-400 mb-1">받는 주소</p>
+              <p id="txTo" class="font-mono text-sm break-all text-gray-100">-</p>
+            </div>
+            <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
+              <p class="text-sm text-gray-400 mb-1">전송 금액</p>
+              <p id="txAmount" class="text-lg font-semibold">-</p>
+            </div>
+          </div>
+
+          <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
+            <p class="text-sm text-gray-400 mb-1">상태</p>
+            <p id="txStatus" class="text-lg font-semibold">-</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const connectBtn = document.getElementById('connectBtn');
+    const walletInfo = document.getElementById('walletInfo');
+    const metamaskWarning = document.getElementById('metamaskWarning');
+    const faucetWarning = document.getElementById('faucetWarning');
+    const errorBox = document.getElementById('errorBox');
+
+    const addressEl = document.getElementById('address');
+    const balanceEl = document.getElementById('balance');
+    const nonceEl = document.getElementById('nonce');
+    const networkEl = document.getElementById('network');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+
+    const toAddressInput = document.getElementById('toAddress');
+    const sendAmountInput = document.getElementById('sendAmount');
+    const sendBtn = document.getElementById('sendBtn');
+    const txLoading = document.getElementById('txLoading');
+    const txError = document.getElementById('txError');
+    const txResult = document.getElementById('txResult');
+    const txHash = document.getElementById('txHash');
+    const txNonce = document.getElementById('txNonce');
+    const txTo = document.getElementById('txTo');
+    const txAmount = document.getElementById('txAmount');
+    const txStatus = document.getElementById('txStatus');
+
+    let provider = null;
+    let signer = null;
+    let currentAddress = null;
+
+    function setStatus(connected) {
+      statusDot.className = `w-3 h-3 rounded-full ${connected ? 'bg-green-400' : 'bg-gray-500'}`;
+      statusText.textContent = connected ? '연결됨' : '미연결';
+      sendBtn.disabled = !connected;
+    }
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.classList.remove('hidden');
+    }
+
+    function clearMessages() {
+      errorBox.classList.add('hidden');
+      metamaskWarning.classList.add('hidden');
+      faucetWarning.classList.add('hidden');
+    }
+
+    function clearTxMessages() {
+      txLoading.classList.add('hidden');
+      txError.classList.add('hidden');
+    }
+
+    function showTxError(message) {
+      txError.textContent = message;
+      txError.classList.remove('hidden');
+    }
+
+    function getNetworkName(chainId) {
+      const networkMap = {
+        1: 'Ethereum Mainnet',
+        11155111: 'Sepolia',
+        5: 'Goerli',
+        17000: 'Holesky',
+        137: 'Polygon',
+        80002: 'Polygon Amoy',
+        56: 'BNB Smart Chain',
+        97: 'BSC Testnet'
+      };
+      return networkMap[Number(chainId)] || `Unknown (Chain ID: ${chainId})`;
+    }
+
+    async function loadWalletData() {
+      clearMessages();
+
+      if (!window.ethereum) {
+        setStatus(false);
+        walletInfo.classList.add('hidden');
+        metamaskWarning.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send('eth_requestAccounts', []);
+
+        signer = await provider.getSigner();
+        currentAddress = await signer.getAddress();
+
+        const balance = await provider.getBalance(currentAddress);
+        const nonce = await provider.getTransactionCount(currentAddress);
+        const network = await provider.getNetwork();
+        const formattedBalance = ethers.formatEther(balance);
+
+        addressEl.textContent = currentAddress;
+        balanceEl.textContent = `${Number(formattedBalance).toFixed(6)} ETH`;
+        nonceEl.textContent = nonce;
+        networkEl.textContent = getNetworkName(network.chainId);
+
+        walletInfo.classList.remove('hidden');
+        setStatus(true);
+
+        if (balance === 0n) {
+          faucetWarning.classList.remove('hidden');
+        }
+      } catch (error) {
+        console.error(error);
+        setStatus(false);
+        walletInfo.classList.add('hidden');
+
+        if (error && error.code === 4001) {
+          showError('사용자가 지갑 연결 요청을 거부했습니다.');
+        } else {
+          showError('지갑 연결 중 오류가 발생했습니다. MetaMask 상태를 확인해주세요.');
+        }
+      }
+    }
+
+    async function sendEth() {
+      clearTxMessages();
+      txResult.classList.add('hidden');
+
+      if (!provider || !signer) {
+        showTxError('먼저 MetaMask를 연결하세요.');
+        return;
+      }
+
+      const rawTo = toAddressInput.value.trim();
+      const rawAmount = sendAmountInput.value.trim();
+
+      if (!rawTo) {
+        showTxError('받는 주소를 입력하세요.');
+        return;
+      }
+
+      if (!rawAmount || Number(rawAmount) <= 0) {
+        showTxError('0보다 큰 금액을 입력하세요.');
+        return;
+      }
+
+      let to;
+      try {
+        to = ethers.getAddress(rawTo);
+      } catch (e) {
+        showTxError('유효하지 않은 주소입니다.');
+        return;
+      }
+
+      try {
+        txLoading.classList.remove('hidden');
+
+        const tx = await signer.sendTransaction({
+          to: to,
+          value: ethers.parseEther(rawAmount)
+        });
+
+        const receipt = await tx.wait();
+
+        txHash.textContent = tx.hash;
+        txNonce.textContent = tx.nonce;
+        txTo.textContent = tx.to;
+        txAmount.textContent = `${ethers.formatEther(tx.value)} ETH`;
+        txStatus.textContent = receipt.status === 1 ? '성공' : '실패';
+
+        txResult.classList.remove('hidden');
+
+        await loadWalletData();
+      } catch (error) {
+        console.error(error);
+
+        if (error && error.code === 4001) {
+          showTxError('사용자가 MetaMask에서 트랜잭션을 거절했습니다.');
+        } else {
+          showTxError('송금 중 오류가 발생했습니다. 잔액과 주소를 다시 확인해주세요.');
+        }
+      } finally {
+        txLoading.classList.add('hidden');
+      }
+    }
+
+    connectBtn.addEventListener('click', loadWalletData);
+    sendBtn.addEventListener('click', sendEth);
+
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', loadWalletData);
+      window.ethereum.on('chainChanged', () => window.location.reload());
+    } else {
+      metamaskWarning.classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>
