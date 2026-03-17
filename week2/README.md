@@ -1,5 +1,5 @@
 # Week2 - Ethereum RPC Practice
-
+20201500 최진우 2주차 실습입니다.
 ## Project Description
 This project demonstrates two different ways to retrieve Ethereum blockchain data using Infura:
 
