@@ -10,8 +10,8 @@
 └── solidity_lab_simulator_lab1.html
 ```
 ## Solidity_Lab_Simulator_lab1.html Descriptions
-1. 탭1 - HelloWorld.sol :
+1. 탭1 - HelloWorld.sol
 2. 탭2 - HelloWorldExtend.sol
-3. 탭3 - HelloNumber.sol :
+3. 탭3 - HelloNumber.sol
 4. 탭4 - HelloNumberExtend.sol 
 5. 탭5 - HelloCombined.sol : combine with HelloWorldExtend.sol and HelloNumberExtend.sol
