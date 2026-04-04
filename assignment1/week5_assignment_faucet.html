@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Week 5 Solidity Lab Simulator</title>
+  <style>
+    :root {
+      --bg:#0a0e27;
+      --panel:#111633;
+      --panel-2:#1a1f4a;
+      --line:#2a3273;
+      --text:#e8ecff;
+      --muted:#9aa5d3;
+      --cyan:#00d4ff;
+      --purple:#7c3aed;
+      --green:#10b981;
+      --orange:#f59e0b;
+      --red:#ef4444;
+      --blue:#3b82f6;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #090d22, #111633 45%, #171d48);
+      color: var(--text);
+      font-family: 'Segoe UI', 'Malgun Gothic', sans-serif;
+      min-height: 100vh;
+    }
+    .app {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+    .hero {
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:16px;
+      flex-wrap:wrap;
+    }
+    .hero-card, .account-card, .panel {
+      background: rgba(17,22,51,.92);
+      border:1px solid var(--line);
+      border-radius:18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .hero-card {
+      padding:20px 22px;
+      flex:1;
+      min-width:320px;
+    }
+    h1 {
+      margin:0 0 8px;
+      font-size:32px;
+      line-height:1.2;
+      background: linear-gradient(90deg, var(--cyan), #8b5cf6 55%, var(--green));
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+    }
+    .subtitle { color:var(--muted); line-height:1.6; }
+    .account-card {
+      width:380px;
+      padding:18px;
+    }
+    .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .tabs { display:flex; gap:10px; margin:14px 0 16px; flex-wrap:wrap; }
+    .tab {
+      border:1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      padding:12px 16px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:600;
+    }
+    .tab.active { background: rgba(124,58,237,.22); border-color: var(--purple); }
+    .layout {
+      display:grid;
+      grid-template-columns: 1.2fr .9fr 1fr;
+      gap:16px;
+    }
+    .panel { padding:16px; min-height: 650px; }
+    .panel h2 {
+      margin:0 0 12px;
+      font-size:20px;
+    }
+    .code-toolbar, .control-actions { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px; }
+    button, select, input {
+      border-radius:10px;
+      border:1px solid var(--line);
+      background:#0e1433;
+      color:var(--text);
+      padding:10px 12px;
+      font:inherit;
+    }
+    button { cursor:pointer; }
+    button.primary { background: rgba(0,212,255,.12); border-color: var(--cyan); }
+    button.success { background: rgba(16,185,129,.12); border-color: var(--green); }
+    button.warn { background: rgba(245,158,11,.12); border-color: var(--orange); }
+    button.danger { background: rgba(239,68,68,.12); border-color: var(--red); }
+    textarea.code {
+      width:100%;
+      height:540px;
+      resize:vertical;
+      border-radius:14px;
+      border:1px solid var(--line);
+      background:#0a1028;
+      color:#d8e2ff;
+      padding:16px;
+      font-family: Consolas, 'Fira Code', monospace;
+      font-size:14px;
+      line-height:1.6;
+      tab-size: 4;
+    }
+    .status-box, .info-box, .log-box, .state-box {
+      background: rgba(26,31,74,.9);
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:14px;
+      margin-top:10px;
+    }
+    .small { color:var(--muted); font-size:13px; line-height:1.6; }
+    .badge {
+      display:inline-block;
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:12px;
+      margin:2px 4px 2px 0;
+      border:1px solid var(--line);
+      color:#dbe3ff;
+      background:#0d1331;
+    }
+    .badge.green { border-color: var(--green); color:#8df0c4; }
+    .badge.orange { border-color: var(--orange); color:#ffd78a; }
+    .badge.purple { border-color: var(--purple); color:#cdb5ff; }
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+    .field { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+    .field label { color:var(--muted); font-size:13px; }
+    .mono { font-family: Consolas, monospace; }
+    .interaction-section { margin-bottom:16px; }
+    .interaction-section h3 { margin:0 0 10px; font-size:16px; }
+    .action-line { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+    .action-line .read { border-color: var(--green); background: rgba(16,185,129,.1); }
+    .action-line .write { border-color: var(--orange); background: rgba(245,158,11,.1); }
+    .console {
+      max-height: 230px;
+      overflow:auto;
+      font-family: Consolas, monospace;
+      font-size:13px;
+      line-height:1.5;
+      white-space:pre-wrap;
+    }
+    .console-entry { padding:8px 0; border-bottom:1px solid rgba(154,165,211,.14); }
+    .console-entry:last-child { border-bottom:none; }
+    .success-text { color:#7df0b8; }
+    .warn-text { color:#ffd47d; }
+    .error-text { color:#ff9c9c; }
+    .hint-list { margin:0; padding-left:18px; line-height:1.7; color:#d8ddf9; }
+    @media (max-width: 1200px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel { min-height:auto; }
+      textarea.code { height: 360px; }
+      .account-card { width:100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="hero">
+      <div class="hero-card">
+        <h1>Week 5 Solidity Lab Simulator</h1>
+        <div class="subtitle">
+          Counter.sol, CounterNumber.sol, Faucet를 브라우저에서 바로 실습할 수 있게 만든 단일 HTML 버전입니다.
+          Counter는 상태 변경과 getter/view 차이를, CounterNumber는 private 변수와 외부 컨트랙트 조회를,
+          Faucet은 owner·payable·mapping·cooldown 흐름을 보여주도록 구성했습니다.
+        </div>
+        <div style="margin-top:12px;">
+          <span class="badge purple">Counter.sol</span>
+          <span class="badge green">CounterNumber.sol</span>
+          <span class="badge orange">Faucet.sol</span>
+        </div>
+      </div>
+      <div class="account-card">
+        <div class="field">
+          <label>현재 계정</label>
+          <select id="accountSelect"></select>
+        </div>
+        <div class="grid2">
+          <div class="info-box">
+            <div class="small">잔액</div>
+            <div id="balanceView" class="mono"></div>
+          </div>
+          <div class="info-box">
+            <div class="small">Nonce</div>
+            <div id="nonceView" class="mono"></div>
+          </div>
+        </div>
+        <div class="info-box" style="margin-top:10px;">
+          <div class="small">주소</div>
+          <div id="addressView" class="mono" style="word-break:break-all;"></div>
+        </div>
+        <div class="info-box" style="margin-top:10px;">
+          <div class="small">가상 체인 정보</div>
+          <div class="mono">Chain ID: 1337<br>Gas Price: 20 Gwei<br>Clock: <span id="clockView"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs"></div>
+
+    <div class="layout">
+      <section class="panel">
+        <h2>코드 에디터</h2>
+        <div class="code-toolbar">
+          <button class="primary" id="copyBtn">코드 복사</button>
+          <button class="danger" id="resetBtn">현재 탭 초기화</button>
+        </div>
+        <textarea class="code" id="codeEditor"></textarea>
+      </section>
+
+      <section class="panel">
+        <h2>컴파일 / 배포 / 가이드</h2>
+        <div class="control-actions">
+          <button class="primary" id="compileBtn">컴파일</button>
+          <button class="success" id="deployBtn">배포</button>
+          <button class="warn" id="advanceTimeBtn">+ 1 day</button>
+        </div>
+        <div class="status-box">
+          <div class="small">컴파일 상태</div>
+          <div id="compileStatus">아직 컴파일하지 않음</div>
+        </div>
+        <div class="status-box">
+          <div class="small">배포 상태</div>
+          <div id="deployStatus">아직 배포하지 않음</div>
+        </div>
+        <div class="state-box" id="stateView"></div>
+        <div class="info-box">
+          <h3 style="margin:0 0 8px;">실습 포인트</h3>
+          <ul class="hint-list" id="guideList"></ul>
+        </div>
+        <div class="log-box">
+          <h3 style="margin:0 0 8px;">콘솔</h3>
+          <div class="console" id="console"></div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>인터랙션 패널</h2>
+        <div id="interactionPanel" class="small">컴파일 후 배포하면 함수 버튼이 활성화됩니다.</div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const defaultCodes = {
+      counter: `// SPDX-License-Identifier: MIT
+pragma solidity 0.8.26;
+
+contract Counter {
+    uint public counter;
+
+    constructor() {
+        counter = 0;
+    }
+
+    function count() public {
+        counter = counter + 1;
+    }
+
+    function get() public view returns (uint) {
+        return counter;
+    }
+}`,
+      counterNumber: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.26;
+
+interface ICounterNumber {
+    function getNumber() external view returns (int256);
+}
+
+contract CounterNumber {
+    int256 private number = 10;
+
+    function getNumber() public view returns (int256) {
+        return number;
+    }
+
+    function setNumber(int256 newNumber) public {
+        number = newNumber;
+    }
+}
+
+contract CounterNumberReader {
+    function readNumber(address target) external view returns (int256) {
+        return ICounterNumber(target).getNumber();
+    }
+}`,
+      faucet: `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Faucet {
+    address payable public owner;
+    uint256 public constant WITHDRAWAL_AMOUNT = 0.1 ether;
+    uint256 public constant LOCK_TIME = 1 days;
+
+    mapping(address => uint256) public lastWithdrawalTime;
+
+    event Deposit(address indexed user, uint256 amount);
+    event Withdrawal(address indexed user, uint256 amount);
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can call this function.");
+        _;
+    }
+
+    constructor() {
+        owner = payable(msg.sender);
+    }
+
+    function withdraw() external {
+        require(
+            block.timestamp >= lastWithdrawalTime[msg.sender] + LOCK_TIME,
+            "You must wait 24 hours between withdrawals."
+        );
+        require(
+            address(this).balance >= WITHDRAWAL_AMOUNT,
+            "Insufficient balance in the faucet."
+        );
+
+        lastWithdrawalTime[msg.sender] = block.timestamp;
+        payable(msg.sender).transfer(WITHDRAWAL_AMOUNT);
+        emit Withdrawal(msg.sender, WITHDRAWAL_AMOUNT);
+    }
+
+    function deposit() external payable onlyOwner {
+        emit Deposit(msg.sender, msg.value);
+    }
+
+    function withdrawAll() external onlyOwner {
+        uint256 amount = address(this).balance;
+        owner.transfer(amount);
+        emit Withdrawal(owner, amount);
+    }
+
+    receive() external payable {
+        emit Deposit(msg.sender, msg.value);
+    }
+}`
+    };
+
+    const tabs = [
+      {
+        id: 'counter',
+        title: 'Counter.sol',
+        guide: [
+          'public 상태 변수 counter는 자동 getter(counter())가 생성되는 구조를 보여줍니다.',
+          'count()는 상태를 바꾸는 함수라 Remix에서 주황색 버튼이 됩니다.',
+          'get()은 view 함수라 읽기 전용이며 무료 호출 개념을 확인할 수 있습니다.'
+        ]
+      },
+      {
+        id: 'counterNumber',
+        title: 'CounterNumber.sol',
+        guide: [
+          'HelloNumber 확장 과제처럼 public을 private으로 바꾸고 getter/setter를 직접 작성한 버전입니다.',
+          'CounterNumberReader는 다른 컨트랙트가 getNumber()를 호출하는 예시입니다.',
+          'setNumber(int256) 호출 후 getNumber()와 외부 조회 결과가 같이 바뀌는지 확인하세요.'
+        ]
+      },
+      {
+        id: 'faucet',
+        title: 'Faucet.sol',
+        guide: [
+          'constructor()에서 배포자 주소가 owner가 됩니다.',
+          'deposit()은 owner만 호출 가능하고 payable이라 ETH를 함께 보낼 수 있습니다.',
+          'withdraw()는 24시간 제한, 잔액 확인, 출금 시간 기록, 전송 순서로 동작합니다.'
+        ]
+      }
+    ];
+
+    const engine = {
+      chainId: 1337,
+      gasPriceGwei: 20,
+      timestamp: Math.floor(Date.now() / 1000),
+      blockNumber: 1,
+      accounts: [
+        { label: 'Account 1', address: '0x5B38Da6a701c568545dCfcB03FcB875f56beddC4', balance: 100, nonce: 0 },
+        { label: 'Account 2', address: '0xAb8483F64d9C6d1EcF9b849Ae677dD3315835c8f', balance: 100, nonce: 0 },
+        { label: 'Account 3', address: '0x4B20993Bc481177ec7E8f571CeCaE8A9e22C02db', balance: 100, nonce: 0 },
+        { label: 'Account 4', address: '0x78731D3Ca6b7E34aC0F824c42A7cC18A495cabaB', balance: 100, nonce: 0 },
+        { label: 'Account 5', address: '0x617F2E2fD72Fd9D5d39A0F43C5E9b5D3F1b1c6D1', balance: 100, nonce: 0 }
+      ],
+      currentAccount: 0,
+      deployments: {
+        counter: null,
+        counterNumber: null,
+        faucet: null
+      }
+    };
+
+    let currentTab = 'counter';
+    let compiled = { counter:false, counterNumber:false, faucet:false };
+
+    const tabsEl = document.getElementById('tabs');
+    const editor = document.getElementById('codeEditor');
+    const accountSelect = document.getElementById('accountSelect');
+    const balanceView = document.getElementById('balanceView');
+    const nonceView = document.getElementById('nonceView');
+    const addressView = document.getElementById('addressView');
+    const clockView = document.getElementById('clockView');
+    const compileStatus = document.getElementById('compileStatus');
+    const deployStatus = document.getElementById('deployStatus');
+    const stateView = document.getElementById('stateView');
+    const guideList = document.getElementById('guideList');
+    const consoleEl = document.getElementById('console');
+    const interactionPanel = document.getElementById('interactionPanel');
+
+    function saveCode(tabId) {
+      localStorage.setItem('week5-code-' + tabId, editor.value);
+    }
+    function loadCode(tabId) {
+      return localStorage.getItem('week5-code-' + tabId) || defaultCodes[tabId];
+    }
+    function setClock() {
+      const d = new Date(engine.timestamp * 1000);
+      clockView.textContent = d.toLocaleString('ko-KR');
+    }
+    function currentAccount() {
+      return engine.accounts[engine.currentAccount];
+    }
+    function addConsole(type, message) {
+      const div = document.createElement('div');
+      div.className = 'console-entry';
+      const cls = type === 'success' ? 'success-text' : type === 'warning' ? 'warn-text' : type === 'error' ? 'error-text' : '';
+      div.innerHTML = `<span class="${cls}">[${new Date().toLocaleTimeString('ko-KR')}] ${message}</span>`;
+      consoleEl.prepend(div);
+    }
+    function spendGas(account, gasUsed) {
+      const ethCost = gasUsed * engine.gasPriceGwei / 1e9;
+      account.balance -= ethCost;
+      account.nonce += 1;
+      engine.blockNumber += 1;
+      engine.timestamp += 12;
+      return ethCost;
+    }
+    function renderAccounts() {
+      accountSelect.innerHTML = '';
+      engine.accounts.forEach((acc, idx) => {
+        const opt = document.createElement('option');
+        opt.value = idx;
+        opt.textContent = `${acc.label} · ${acc.address.slice(0, 10)}...`;
+        accountSelect.appendChild(opt);
+      });
+      accountSelect.value = engine.currentAccount;
+      const acc = currentAccount();
+      balanceView.textContent = acc.balance.toFixed(6) + ' ETH';
+      nonceView.textContent = String(acc.nonce);
+      addressView.textContent = acc.address;
+      setClock();
+    }
+    function compileCurrent() {
+      const code = editor.value;
+      const hasPragma = /pragma\s+solidity/.test(code);
+      const hasContract = /contract\s+[A-Za-z_][A-Za-z0-9_]*/.test(code);
+      const braceOk = (code.match(/{/g) || []).length === (code.match(/}/g) || []).length;
+      if (!hasPragma || !hasContract || !braceOk) {
+        compiled[currentTab] = false;
+        compileStatus.innerHTML = '<span class="error-text">컴파일 실패: pragma / contract / 중괄호를 확인하세요.</span>';
+        addConsole('error', `${currentTab} 컴파일 실패`);
+        return;
+      }
+      compiled[currentTab] = true;
+      compileStatus.innerHTML = '<span class="success-text">컴파일 성공</span> · 구문 검증 통과';
+      addConsole('success', `${currentTab} 컴파일 성공`);
+      renderInteraction();
+    }
+    function deployCurrent() {
+      if (!compiled[currentTab]) {
+        addConsole('warning', '먼저 컴파일하세요.');
+        return;
+      }
+      const acc = currentAccount();
+      const txCost = spendGas(acc, 53000);
+      if (currentTab === 'counter') {
+        engine.deployments.counter = { address: fakeAddress('counter'), owner: acc.address, counter: 0 };
+      } else if (currentTab === 'counterNumber') {
+        engine.deployments.counterNumber = { address: fakeAddress('counterNumber'), owner: acc.address, number: 10 };
+      } else if (currentTab === 'faucet') {
+        engine.deployments.faucet = {
+          address: fakeAddress('faucet'),
+          owner: acc.address,
+          balance: 0,
+          withdrawalAmount: 0.1,
+          lockTime: 86400,
+          lastWithdrawalTime: {}
+        };
+      }
+      deployStatus.innerHTML = `<span class="success-text">배포 완료</span> · ${currentTab} @ ${getDeployment().address}`;
+      addConsole('success', `${currentTab} 배포 완료 · gas ${(txCost).toFixed(6)} ETH`);
+      renderAccounts();
+      renderState();
+      renderInteraction();
+    }
+    function fakeAddress(seed) {
+      const n = (Date.now().toString(16) + seed).slice(-40).padStart(40, '0');
+      return '0x' + n;
+    }
+    function getDeployment() {
+      return engine.deployments[currentTab];
+    }
+    function renderGuides() {
+      const tab = tabs.find(t => t.id === currentTab);
+      guideList.innerHTML = tab.guide.map(x => `<li>${x}</li>`).join('');
+    }
+    function renderState() {
+      const d = getDeployment();
+      if (!d) {
+        stateView.innerHTML = '<div class="small">배포 후 상태 변수가 여기에 표시됩니다.</div>';
+        return;
+      }
+      if (currentTab === 'counter') {
+        stateView.innerHTML = `<h3 style="margin:0 0 8px;">상태 변수</h3>
+          <div class="small mono">counter (uint, public) = ${d.counter}</div>
+          <div class="small mono" style="margin-top:6px;">deployer = ${d.owner}</div>`;
+      } else if (currentTab === 'counterNumber') {
+        stateView.innerHTML = `<h3 style="margin:0 0 8px;">상태 변수</h3>
+          <div class="small mono">number (int256, private) = ${d.number}</div>
+          <div class="small">private이라 자동 getter가 없고 getNumber()가 필요합니다.</div>`;
+      } else {
+        const lastMap = Object.entries(d.lastWithdrawalTime).map(([k,v]) => `${k.slice(0,10)}... : ${new Date(v*1000).toLocaleString('ko-KR')}`).join('<br>') || '기록 없음';
+        stateView.innerHTML = `<h3 style="margin:0 0 8px;">상태 변수</h3>
+          <div class="small mono">owner = ${d.owner}</div>
+          <div class="small mono">WITHDRAWAL_AMOUNT = ${d.withdrawalAmount} ETH</div>
+          <div class="small mono">LOCK_TIME = ${d.lockTime} sec</div>
+          <div class="small mono">contract balance = ${d.balance.toFixed(6)} ETH</div>
+          <div class="small" style="margin-top:8px;">lastWithdrawalTime</div>
+          <div class="small mono" style="margin-top:6px; word-break:break-all;">${lastMap}</div>`;
+      }
+    }
+
+    function renderInteraction() {
+      const d = getDeployment();
+      if (!compiled[currentTab]) {
+        interactionPanel.innerHTML = '컴파일 후 배포하면 함수 버튼이 활성화됩니다.';
+        return;
+      }
+      if (!d) {
+        interactionPanel.innerHTML = '배포 전입니다. Deploy 버튼을 누르세요.';
+        return;
+      }
+      if (currentTab === 'counter') {
+        interactionPanel.innerHTML = `
+          <div class="interaction-section">
+            <h3>자동 getter / view</h3>
+            <div class="action-line">
+              <button class="read" onclick="callCounterGetter()">counter()</button>
+              <button class="read" onclick="callCounterGet()">get()</button>
+            </div>
+          </div>
+          <div class="interaction-section">
+            <h3>상태 변경</h3>
+            <div class="action-line">
+              <button class="write" onclick="callCounterCount()">count()</button>
+            </div>
+          </div>`;
+      } else if (currentTab === 'counterNumber') {
+        interactionPanel.innerHTML = `
+          <div class="interaction-section">
+            <h3>조회</h3>
+            <div class="action-line">
+              <button class="read" onclick="callGetNumber()">getNumber()</button>
+              <button class="read" onclick="callReadNumberExternally()">CounterNumberReader.readNumber()</button>
+            </div>
+          </div>
+          <div class="interaction-section">
+            <h3>수정</h3>
+            <div class="field">
+              <label>newNumber</label>
+              <input id="newNumberInput" type="number" value="25" />
+            </div>
+            <div class="action-line">
+              <button class="write" onclick="callSetNumber()">setNumber(int256)</button>
+            </div>
+          </div>`;
+      } else {
+        interactionPanel.innerHTML = `
+          <div class="interaction-section">
+            <h3>읽기</h3>
+            <div class="action-line">
+              <button class="read" onclick="readFaucetOwner()">owner()</button>
+              <button class="read" onclick="readFaucetBalance()">address(this).balance</button>
+              <button class="read" onclick="readMyLastWithdrawal()">lastWithdrawalTime(msg.sender)</button>
+            </div>
+          </div>
+          <div class="interaction-section">
+            <h3>입금 / 출금</h3>
+            <div class="field">
+              <label>deposit / direct transfer amount (ETH)</label>
+              <input id="depositAmountInput" type="number" min="0" step="0.01" value="1.0" />
+            </div>
+            <div class="action-line">
+              <button class="write" onclick="callDeposit()">deposit()</button>
+              <button class="write" onclick="callReceive()">receive() 직접 전송</button>
+              <button class="write" onclick="callWithdraw()">withdraw()</button>
+              <button class="write" onclick="callWithdrawAll()">withdrawAll()</button>
+            </div>
+          </div>`;
+      }
+    }
+
+    function switchTab(id) {
+      saveCode(currentTab);
+      currentTab = id;
+      editor.value = loadCode(currentTab);
+      [...tabsEl.children].forEach(btn => btn.classList.toggle('active', btn.dataset.id === id));
+      renderGuides();
+      renderState();
+      renderInteraction();
+      compileStatus.textContent = compiled[currentTab] ? '컴파일 성공 상태 유지' : '아직 컴파일하지 않음';
+      deployStatus.textContent = getDeployment() ? `배포 완료 · ${getDeployment().address}` : '아직 배포하지 않음';
+    }
+
+    function initTabs() {
+      tabs.forEach(tab => {
+        const btn = document.createElement('button');
+        btn.className = 'tab';
+        btn.dataset.id = tab.id;
+        btn.textContent = tab.title;
+        btn.onclick = () => switchTab(tab.id);
+        tabsEl.appendChild(btn);
+      });
+    }
+
+    // Counter actions
+    window.callCounterGetter = function() {
+      const d = engine.deployments.counter;
+      addConsole('success', `counter() → ${d.counter}`);
+    }
+    window.callCounterGet = function() {
+      const d = engine.deployments.counter;
+      addConsole('success', `get() → ${d.counter}`);
+    }
+    window.callCounterCount = function() {
+      const d = engine.deployments.counter;
+      const acc = currentAccount();
+      const cost = spendGas(acc, 45000);
+      d.counter += 1;
+      addConsole('warning', `count() 실행 → counter = ${d.counter}, gas ${cost.toFixed(6)} ETH`);
+      renderAccounts(); renderState();
+    }
+
+    // CounterNumber actions
+    window.callGetNumber = function() {
+      const d = engine.deployments.counterNumber;
+      addConsole('success', `getNumber() → ${d.number}`);
+    }
+    window.callReadNumberExternally = function() {
+      const d = engine.deployments.counterNumber;
+      addConsole('success', `CounterNumberReader.readNumber(${d.address}) → ${d.number}`);
+    }
+    window.callSetNumber = function() {
+      const d = engine.deployments.counterNumber;
+      const val = Number(document.getElementById('newNumberInput').value);
+      const acc = currentAccount();
+      const cost = spendGas(acc, 46000);
+      d.number = val;
+      addConsole('warning', `setNumber(${val}) 실행 → number = ${d.number}, gas ${cost.toFixed(6)} ETH`);
+      renderAccounts(); renderState();
+    }
+
+    // Faucet actions
+    window.readFaucetOwner = function() {
+      addConsole('success', `owner() → ${engine.deployments.faucet.owner}`);
+    }
+    window.readFaucetBalance = function() {
+      addConsole('success', `address(this).balance → ${engine.deployments.faucet.balance.toFixed(6)} ETH`);
+    }
+    window.readMyLastWithdrawal = function() {
+      const d = engine.deployments.faucet;
+      const acc = currentAccount();
+      const ts = d.lastWithdrawalTime[acc.address] || 0;
+      addConsole('success', `lastWithdrawalTime(${acc.address.slice(0,10)}...) → ${ts}`);
+    }
+    function readDepositAmount() {
+      return Math.max(0, Number(document.getElementById('depositAmountInput').value || 0));
+    }
+    window.callDeposit = function() {
+      const d = engine.deployments.faucet;
+      const acc = currentAccount();
+      const amount = readDepositAmount();
+      if (acc.address !== d.owner) {
+        addConsole('error', 'deposit() 실패: onlyOwner');
+        return;
+      }
+      if (acc.balance < amount) {
+        addConsole('error', 'deposit() 실패: 계정 잔액 부족');
+        return;
+      }
+      const gasCost = spendGas(acc, 52000);
+      acc.balance -= amount;
+      d.balance += amount;
+      addConsole('warning', `deposit(${amount} ETH) 성공 · msg.sender=${acc.address.slice(0,10)}... · msg.value=${amount} ETH · gas ${gasCost.toFixed(6)} ETH`);
+      renderAccounts(); renderState();
+    }
+    window.callReceive = function() {
+      const d = engine.deployments.faucet;
+      const acc = currentAccount();
+      const amount = readDepositAmount();
+      if (acc.balance < amount) {
+        addConsole('error', 'receive() 실패: 계정 잔액 부족');
+        return;
+      }
+      const gasCost = spendGas(acc, 28000);
+      acc.balance -= amount;
+      d.balance += amount;
+      addConsole('warning', `receive() 직접 전송 성공 · msg.sender=${acc.address.slice(0,10)}... · msg.value=${amount} ETH · gas ${gasCost.toFixed(6)} ETH`);
+      renderAccounts(); renderState();
+    }
+    window.callWithdraw = function() {
+      const d = engine.deployments.faucet;
+      const acc = currentAccount();
+      const last = d.lastWithdrawalTime[acc.address] || 0;
+      if (engine.timestamp < last + d.lockTime) {
+        addConsole('error', 'withdraw() 실패: 24시간이 지나지 않았습니다.');
+        return;
+      }
+      if (d.balance < d.withdrawalAmount) {
+        addConsole('error', 'withdraw() 실패: faucet 잔액 부족');
+        return;
+      }
+      const gasCost = spendGas(acc, 65000);
+      d.lastWithdrawalTime[acc.address] = engine.timestamp;
+      d.balance -= d.withdrawalAmount;
+      acc.balance += d.withdrawalAmount;
+      addConsole('warning', `withdraw() 성공 → ${d.withdrawalAmount} ETH 수령 · msg.sender=${acc.address.slice(0,10)}... · gas ${gasCost.toFixed(6)} ETH`);
+      renderAccounts(); renderState();
+    }
+    window.callWithdrawAll = function() {
+      const d = engine.deployments.faucet;
+      const acc = currentAccount();
+      if (acc.address !== d.owner) {
+        addConsole('error', 'withdrawAll() 실패: onlyOwner');
+        return;
+      }
+      const gasCost = spendGas(acc, 50000);
+      const amount = d.balance;
+      d.balance = 0;
+      acc.balance += amount;
+      addConsole('warning', `withdrawAll() 성공 → owner가 ${amount.toFixed(6)} ETH 회수 · gas ${gasCost.toFixed(6)} ETH`);
+      renderAccounts(); renderState();
+    }
+
+    document.getElementById('copyBtn').onclick = async () => {
+      await navigator.clipboard.writeText(editor.value);
+      addConsole('success', '코드를 클립보드에 복사했습니다.');
+    };
+    document.getElementById('resetBtn').onclick = () => {
+      localStorage.removeItem('week5-code-' + currentTab);
+      editor.value = defaultCodes[currentTab];
+      addConsole('warning', `${currentTab} 코드를 기본값으로 초기화했습니다.`);
+    };
+    document.getElementById('compileBtn').onclick = compileCurrent;
+    document.getElementById('deployBtn').onclick = deployCurrent;
+    document.getElementById('advanceTimeBtn').onclick = () => {
+      engine.timestamp += 86400;
+      addConsole('info', '시간을 1 day 진행했습니다.');
+      renderAccounts(); renderState();
+    };
+    editor.addEventListener('input', () => saveCode(currentTab));
+    accountSelect.onchange = (e) => {
+      engine.currentAccount = Number(e.target.value);
+      renderAccounts();
+      renderState();
+    };
+
+    initTabs();
+    renderAccounts();
+    switchTab('counter');
+    addConsole('info', '시뮬레이터 준비 완료');
+  </script>
+</body>
+</html>
