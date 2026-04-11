@@ -21,14 +21,15 @@
 1. faucet.sol을 통해 remix 환경에서 compile & deploy를 실행한다.
 2. 이때 Deploy & Run Transcriptions에서 Environment를 Browser Extension (MetaMask)로 바꿔주고 Account도 Account1로 수정해주자.
 3. Deploy 버튼을 눌러 Contract 주소를 생성해주자. 이를 이용해 Claim 시 Contract 주소 -> MetaMask 지갑 주소로 ETH가 이동할 예정이다.
+
    1~3 img :
 <img width="291" height="809" alt="previous" src="https://github.com/user-attachments/assets/1baef7bd-337e-4b65-b33f-ba7a81ee611e" />
 
-4. MetaMask 지갑에서 Contract 주소로 어느정도 송금해서 시뮬레이션 준비를 끝내자. (본인은 0.02ETH정도를 Contract 주소로 보냄)
+5. MetaMask 지갑에서 Contract 주소로 어느정도 송금해서 시뮬레이션 준비를 끝내자. (본인은 0.02ETH정도를 Contract 주소로 보냄)
    참조 : Remix를 통해서도 Contract 주소로 송금이 가능한것으로 보이긴 한데 그 시도는 실패했었다.
 <img width="804" height="956" alt="previous2" src="https://github.com/user-attachments/assets/db2ed248-c1cb-4d11-bdd7-141d27724ff4" />
 
-5. VScode의 Open with Live Server로 html을 실행한다. 
+6. VScode의 Open with Live Server로 html을 실행한다. 
 
 ## Simulation 실행
 0. ConnectWallet, Refresh Info, Claim 등 실행 시 그 결과를 로그를 통해 확인이 가능하다.
