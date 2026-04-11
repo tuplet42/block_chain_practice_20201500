@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Faucet DApp</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+      color: #111827;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin-top: 0;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 24px;
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      background: #2563eb;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    button:hover:not(:disabled) {
+      background: #1d4ed8;
+    }
+
+    button.secondary {
+      background: #10b981;
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: #059669;
+    }
+
+    button.warn {
+      background: #f59e0b;
+    }
+
+    button.warn:hover:not(:disabled) {
+      background: #d97706;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .info {
+      padding: 14px;
+      border-radius: 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      margin-bottom: 12px;
+      word-break: break-all;
+    }
+
+    .label {
+      font-size: 13px;
+      color: #6b7280;
+      margin-bottom: 4px;
+    }
+
+    .value {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .tx-box a {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .tx-box a:hover {
+      text-decoration: underline;
+    }
+
+    .status {
+      margin-top: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      background: #eef2ff;
+      color: #3730a3;
+      white-space: pre-wrap;
+      line-height: 1.5;
+      min-height: 120px;
+      max-height: 220px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+
+    canvas {
+      max-height: 320px;
+    }
+
+    .muted {
+      color: #6b7280;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Faucet</h1>
+      <div class="subtitle">MetaMask로 연결해서 Faucet에서 0.01 ETH 요청</div>
+
+      <div class="row">
+        <button id="connectBtn">Connect MetaMask Wallet</button>
+        <button id="refreshBtn" class="secondary">Refresh Info</button>
+        <button id="claimBtn" class="warn" disabled>Claim 0.01 ETH</button>
+      </div>
+
+      <div class="info">
+        <div class="label">Connected Wallet Address</div>
+        <div class="value" id="walletAddress">Not connected</div>
+      </div>
+
+      <div class="info">
+        <div class="label">Contract Address</div>
+        <div class="value" id="contractAddress"></div>
+      </div>
+
+      <div class="info">
+        <div class="label">Faucet Balance (ETH)</div>
+        <div class="value" id="faucetBalance">-</div>
+      </div>
+
+      <div class="info">
+        <div class="label">Request Amount</div>
+        <div class="value">0.01 ETH</div>
+      </div>
+
+      <div class="info">
+        <div class="label">Last Transaction Hash</div>
+        <div class="value tx-box" id="txHash">No transaction yet</div>
+      </div>
+
+      <div class="status" id="statusBox">[Ready] Waiting for action.</div>
+    </div>
+
+    <div class="card">
+      <h2>Faucet Balance Over Time</h2>
+      <p class="muted">Refresh나 Claim 할 때 잔액 기록</p>
+      <canvas id="balanceChart"></canvas>
+    </div>
+  </div>
+
+  <script>
+    const CONTRACT_ADDRESS = ""; // 본인 주소로 변경
+
+    const CONTRACT_ABI = [
+      "function withdraw() external",
+      "function WITHDRAWAL_AMOUNT() view returns (uint256)",
+      "function lastWithdrawalTime(address) view returns (uint256)"
+    ];
+
+    let provider = null;
+    let signer = null;
+    let contract = null;
+    let currentAccount = null;
+    let balanceChart = null;
+
+    const connectBtn = document.getElementById("connectBtn");
+    const refreshBtn = document.getElementById("refreshBtn");
+    const claimBtn = document.getElementById("claimBtn");
+    const walletAddressEl = document.getElementById("walletAddress");
+    const contractAddressEl = document.getElementById("contractAddress");
+    const faucetBalanceEl = document.getElementById("faucetBalance");
+    const txHashEl = document.getElementById("txHash");
+    const statusBox = document.getElementById("statusBox");
+
+    contractAddressEl.textContent = CONTRACT_ADDRESS;
+
+    function getNow() {
+      const now = new Date();
+      return now.toLocaleTimeString();
+    }
+
+    function appendStatus(message) {
+      const line = `[${getNow()}] ${message}`;
+      statusBox.textContent += `\n${line}`;
+      statusBox.scrollTop = statusBox.scrollHeight;
+    }
+
+    function resetStatus(message) {
+      statusBox.textContent = `[${getNow()}] ${message}`;
+      statusBox.scrollTop = statusBox.scrollHeight;
+    }
+
+    function getBalanceHistory() {
+      return JSON.parse(localStorage.getItem("faucetBalanceHistory") || "[]");
+    }
+
+    function saveBalanceHistory(history) {
+      localStorage.setItem("faucetBalanceHistory", JSON.stringify(history));
+    }
+
+    function addBalancePoint(balanceEth) {
+      const history = getBalanceHistory();
+      const now = new Date();
+
+      history.push({
+        time: now.toLocaleTimeString(),
+        balance: Number(balanceEth)
+      });
+
+      if (history.length > 15) {
+        history.shift();
+      }
+
+      saveBalanceHistory(history);
+      renderChart();
+    }
+
+    function renderChart() {
+      const history = getBalanceHistory();
+      const ctx = document.getElementById("balanceChart");
+
+      const labels = history.map(item => item.time);
+      const data = history.map(item => item.balance);
+
+      if (balanceChart) {
+        balanceChart.destroy();
+      }
+
+      balanceChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels,
+          datasets: [
+            {
+              label: "Faucet Balance (ETH)",
+              data,
+              borderWidth: 2,
+              tension: 0.2
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    async function ensureMetaMask() {
+      if (!window.ethereum) {
+        throw new Error("MetaMask is not installed.");
+      }
+    }
+
+    async function connectWallet() {
+      try {
+        await ensureMetaMask();
+
+        provider = new ethers.BrowserProvider(window.ethereum);
+        await provider.send("eth_requestAccounts", []);
+        signer = await provider.getSigner();
+        currentAccount = await signer.getAddress();
+        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+        walletAddressEl.textContent = currentAccount;
+        claimBtn.disabled = false;
+
+        resetStatus("Wallet connected successfully.");
+        await refreshInfo();
+      } catch (error) {
+        resetStatus(`Connection failed: ${error.message}`);
+      }
+    }
+
+    async function refreshInfo() {
+      try {
+        await ensureMetaMask();
+
+        if (!provider) {
+          provider = new ethers.BrowserProvider(window.ethereum);
+        }
+
+        const network = await provider.getNetwork();
+        appendStatus(`Connected network chainId: ${network.chainId}`);
+
+        const balanceWei = await provider.getBalance(CONTRACT_ADDRESS);
+        const balanceEth = ethers.formatEther(balanceWei);
+
+        faucetBalanceEl.textContent = `${balanceEth} ETH`;
+        addBalancePoint(balanceEth);
+
+        if (signer) {
+          currentAccount = await signer.getAddress();
+          walletAddressEl.textContent = currentAccount;
+        }
+
+        appendStatus(`Information updated. Faucet balance: ${balanceEth} ETH`);
+
+        if (contract && signer) {
+          const amount = await contract.WITHDRAWAL_AMOUNT();
+          appendStatus(`WITHDRAWAL_AMOUNT: ${ethers.formatEther(amount)} ETH`);
+
+          const last = await contract.lastWithdrawalTime(currentAccount);
+          appendStatus(`lastWithdrawalTime: ${last}`);
+        }
+      } catch (error) {
+        appendStatus(`Refresh failed: ${error.message}`);
+      }
+    }
+
+    function showTxHash(hash) {
+      txHashEl.innerHTML = `
+        <a href="https://sepolia.etherscan.io/tx/${hash}" target="_blank" rel="noopener noreferrer">
+          ${hash}
+        </a>
+      `;
+    }
+
+    async function claimFromFaucet() {
+      try {
+        if (!contract || !signer) {
+          throw new Error("Please connect MetaMask first.");
+        }
+
+        appendStatus("Submitting claim transaction...");
+        txHashEl.textContent = "Pending...";
+
+        const tx = await contract.withdraw();
+        showTxHash(tx.hash);
+        appendStatus(`Transaction submitted. Hash: ${tx.hash}`);
+        appendStatus("Waiting for confirmation...");
+
+        const receipt = await tx.wait();
+
+        appendStatus(`Claim successful. Block Number: ${receipt.blockNumber}`);
+        await refreshInfo();
+      } catch (error) {
+        appendStatus(`Claim failed: ${error.reason || error.message}`);
+      }
+    }
+
+    async function autoReconnect() {
+      if (!window.ethereum) return;
+
+      try {
+        provider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await provider.send("eth_accounts", []);
+
+        if (accounts.length > 0) {
+          signer = await provider.getSigner();
+          currentAccount = await signer.getAddress();
+          contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+          walletAddressEl.textContent = currentAccount;
+          claimBtn.disabled = false;
+          resetStatus("Wallet reconnected.");
+          await refreshInfo();
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    connectBtn.addEventListener("click", connectWallet);
+    refreshBtn.addEventListener("click", refreshInfo);
+    claimBtn.addEventListener("click", claimFromFaucet);
+
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", async () => {
+        await autoReconnect();
+      });
+
+      window.ethereum.on("chainChanged", async () => {
+        window.location.reload();
+      });
+    }
+
+    renderChart();
+    autoReconnect();
+  </script>
+</body>
+</html>
