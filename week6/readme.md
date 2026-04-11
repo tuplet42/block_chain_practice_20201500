@@ -27,15 +27,18 @@
 4. MetaMask 지갑에서 Contract 주소로 어느정도 송금해서 시뮬레이션 준비를 끝내자. (본인은 0.02ETH정도를 Contract 주소로 보냄)
    참조 : Remix를 통해서도 Contract 주소로 송금이 가능한것으로 보이긴 한데 그 시도는 실패했었다.
 <img width="804" height="956" alt="previous2" src="https://github.com/user-attachments/assets/db2ed248-c1cb-4d11-bdd7-141d27724ff4" />
+
 5. VScode의 Open with Live Server로 html을 실행한다. 
 
 ## ConnectWallet
 0. ConnectWallet, Refresh Info, Claim 등 실행 시 그 결과를 로그를 통해 확인이 가능하다.
 1. ConnectWallet 버튼 누르면 MetaMask 지갑과 연결된다. MetaMask와 html파일이 같은 브라우저에 있어야 한다.
    <img width="874" height="734" alt="connectwallet" src="https://github.com/user-attachments/assets/31a57ef5-eb5f-4d89-9075-58175ccf0072" />
+   
 2. Refresh Info를 통해 최신 상태를 확인할 수 있다.
 <img width="874" height="815" alt="refresh1" src="https://github.com/user-attachments/assets/e115e960-542b-4bac-9837-8310b56fe1ca" />
 <img width="874" height="472" alt="refresh2" src="https://github.com/user-attachments/assets/915779f7-0ef7-4607-a38b-5507464d4715" />
+
 3. Claim을 통해 0.01ETH를 지갑으로 보낸다. 이에 따라 Last Transaction Hash와 그래프에서 Contract 주소의 ETH 양이 줄어든 것을 확인할 수 있다. 또한 다시 Claim을 시도하면 24시간이 지나지 않아 claim에 실패한 로그도 확인 가능하다.
 <img width="906" height="863" alt="claim1" src="https://github.com/user-attachments/assets/63d64c1d-3dcc-4782-9f76-8b63dbfb54c3" />
 <img width="872" height="821" alt="claim3" src="https://github.com/user-attachments/assets/7eab8980-5f59-49c5-9bdd-a0228395f9c6" />
