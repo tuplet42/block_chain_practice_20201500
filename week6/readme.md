@@ -30,7 +30,7 @@
 
 5. VScode의 Open with Live Server로 html을 실행한다. 
 
-## ConnectWallet
+## Simulation 실행
 0. ConnectWallet, Refresh Info, Claim 등 실행 시 그 결과를 로그를 통해 확인이 가능하다.
 1. ConnectWallet 버튼 누르면 MetaMask 지갑과 연결된다. MetaMask와 html파일이 같은 브라우저에 있어야 한다.
    <img width="874" height="734" alt="connectwallet" src="https://github.com/user-attachments/assets/31a57ef5-eb5f-4d89-9075-58175ccf0072" />
