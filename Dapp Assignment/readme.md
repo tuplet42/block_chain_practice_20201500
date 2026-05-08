@@ -86,6 +86,7 @@ Dapp_BuyMeACoffee.html : 사용자 화면(UI/프론트앤드) 역할을 수행�
 <img width="387" height="610" alt="deploy" src="https://github.com/user-attachments/assets/5a3e5b78-acae-402a-a172-7076b01d4620" />
 <img width="348" height="388" alt="4-deployed contract" src="https://github.com/user-attachments/assets/15368598-a5e5-4433-a554-ba555766c299" />
 2. deploy해서 뜬 컨트랙트 주소를 복사한다.
+   
 3. 컨트랙트 주소와 BuyMeACoffee.sol의 Solidity Compiler -> Comilation Details에서 ABI 정보를 복사하여 html의 CONTRACT_ADDRESS, CONTRACT_ABI에 넣어준다. (업로드된 html은 이것들이 이미 넣어진 상태이다.)
 <img width="733" height="876" alt="4-copyABI" src="https://github.com/user-attachments/assets/aaa42d5e-f6ef-4e9a-984b-47c8ed6d52cd" />
 4. Dapp_BuyMeACoffee.html을 vscode의 Open With Live Server로 실행한다.
