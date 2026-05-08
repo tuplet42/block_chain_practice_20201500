@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buy Me A Coffee on GIWA - V2</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background:#f7f3ee;
+      margin:0;
+      padding:32px;
+      color:#2d1f14;
+    }
+
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+      background:white;
+      border-radius:20px;
+      padding:28px;
+      box-shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+
+    h1 { margin-top:0; }
+
+    button {
+      border:0;
+      border-radius:12px;
+      padding:12px 16px;
+      margin:6px;
+      cursor:pointer;
+      font-weight:700;
+      background:#8b5e34;
+      color:white;
+    }
+
+    button.secondary {
+      background:#2d1f14;
+    }
+
+    input {
+      width:100%;
+      box-sizing:border-box;
+      padding:12px;
+      border:1px solid #d8c4ad;
+      border-radius:12px;
+      margin:8px 0 12px;
+    }
+
+    .card {
+      background:#fff8f0;
+      border:1px solid #ead8c3;
+      border-radius:14px;
+      padding:16px;
+      margin:14px 0;
+    }
+
+    .row {
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .muted {
+      color:#6f6256;
+      font-size:14px;
+      word-break:break-all;
+    }
+
+    table {
+      width:100%;
+      border-collapse:collapse;
+      margin-top:12px;
+    }
+
+    th, td {
+      border-bottom:1px solid #ead8c3;
+      padding:10px;
+      text-align:left;
+      font-size:14px;
+      word-break:break-all;
+      vertical-align:top;
+    }
+
+    .stats {
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+      gap:12px;
+    }
+
+    .stat {
+      background:white;
+      border-radius:12px;
+      padding:14px;
+      border:1px solid #ead8c3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>☕ Buy Me A Coffee on GIWA</h1>
+    <p class="muted">
+      V2: GIWA 자동 네트워크 전환 / 커피 후원 / 후원 내역 조회 / 출금 기능
+    </p>
+
+    <div class="card">
+      <button id="connectBtn">MetaMask 지갑 연결</button>
+      <p>연결 주소: <span id="account" class="muted">아직 연결되지 않음</span></p>
+      <p>Owner: <span id="owner" class="muted">-</span></p>
+    </div>
+
+    <div class="card stats">
+      <div class="stat">
+        컨트랙트 잔액<br>
+        <strong id="balance">-</strong> ETH
+      </div>
+
+      <div class="stat">
+        누적 후원 금액<br>
+        <strong id="totalAmount">-</strong> ETH
+      </div>
+
+      <div class="stat">
+        후원 횟수<br>
+        <strong id="donationCount">-</strong> 회
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>커피 후원하기</h2>
+
+      <label for="message">응원 메시지</label>
+      <input
+        id="message"
+        maxlength="100"
+        placeholder="예: 좋은 DApp 기대합니다!"
+      />
+
+      <div class="row">
+        <button onclick="buyCoffee('0.001')">
+          Small Coffee 0.001 ETH
+        </button>
+
+        <button onclick="buyCoffee('0.005')">
+          Medium Coffee 0.005 ETH
+        </button>
+
+        <button onclick="buyCoffee('0.01')">
+          Large Coffee 0.01 ETH
+        </button>
+      </div>
+
+      <p id="status" class="muted"></p>
+    </div>
+
+    <div class="card" id="ownerPanel" style="display:none;">
+      <h2>Owner 전용</h2>
+      <button class="secondary" onclick="withdraw()">
+        컨트랙트 잔액 출금
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>후원 내역</h2>
+      <button class="secondary" onclick="loadDonations()">
+        후원 내역 새로고침
+      </button>
+
+      <table>
+        <thead>
+          <tr>
+            <th>후원자</th>
+            <th>금액</th>
+            <th>메시지</th>
+            <th>시간</th>
+          </tr>
+        </thead>
+
+        <tbody id="donationList"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const CONTRACT_ADDRESS = "0x098d0956b4176D02e583917BC51541f49148c449";
+
+    // GIWA Sepolia Chain ID
+    // 91342 -> 0x164CE
+    const GIWA_CHAIN_ID = "0x164CE";
+
+    const CONTRACT_ABI = [
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "message",
+            "type": "string"
+          }
+        ],
+        "name": "buyCoffee",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "donor",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "message",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          }
+        ],
+        "name": "Donated",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "withdraw",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          }
+        ],
+        "name": "Withdrawn",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "getBalance",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getDonationCount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getDonations",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "donor",
+                "type": "address"
+              },
+              {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "message",
+                "type": "string"
+              },
+              {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+              }
+            ],
+            "internalType": "struct BuyMeACoffeeV2.Donation[]",
+            "name": "",
+            "type": "tuple[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "totalDonationAmount",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    let provider, signer, contract, currentAccount;
+
+    document.getElementById("connectBtn").onclick = connectWallet;
+
+    async function switchToGiwa() {
+      const currentChainId = await window.ethereum.request({
+        method: "eth_chainId"
+      });
+
+      if (currentChainId !== GIWA_CHAIN_ID) {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: GIWA_CHAIN_ID }]
+        });
+      }
+    }
+
+    async function connectWallet() {
+      if (!window.ethereum)
+        return alert("MetaMask를 설치해주세요.");
+
+      await switchToGiwa();
+
+      provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+
+      signer = await provider.getSigner();
+      currentAccount = await signer.getAddress();
+
+      contract = new ethers.Contract(
+        CONTRACT_ADDRESS,
+        CONTRACT_ABI,
+        signer
+      );
+
+      document.getElementById("account").innerText = currentAccount;
+
+      await refreshInfo();
+      await loadDonations();
+    }
+
+    async function refreshInfo() {
+      const balance = await contract.getBalance();
+      const owner = await contract.owner();
+      const totalAmount = await contract.totalDonationAmount();
+      const donationCount = await contract.getDonationCount();
+
+      document.getElementById("balance").innerText =
+        ethers.formatEther(balance);
+
+      document.getElementById("owner").innerText = owner;
+
+      document.getElementById("totalAmount").innerText =
+        ethers.formatEther(totalAmount);
+
+      document.getElementById("donationCount").innerText =
+        donationCount.toString();
+
+      document.getElementById("ownerPanel").style.display =
+        owner.toLowerCase() === currentAccount.toLowerCase()
+          ? "block"
+          : "none";
+    }
+
+    async function buyCoffee(amount) {
+      try {
+        await switchToGiwa();
+
+        const message =
+          document.getElementById("message").value ||
+          "Thanks for your work!";
+
+        document.getElementById("status").innerText =
+          "트랜잭션 승인 대기 중...";
+
+        const tx = await contract.buyCoffee(message, {
+          value: ethers.parseEther(amount)
+        });
+
+        document.getElementById("status").innerText =
+          "처리 중: " + tx.hash;
+
+        await tx.wait();
+
+        document.getElementById("status").innerText =
+          "후원 완료! TX: " + tx.hash;
+
+        document.getElementById("message").value = "";
+
+        await refreshInfo();
+        await loadDonations();
+      } catch (e) {
+        document.getElementById("status").innerText =
+          "오류: " + (e.shortMessage || e.message);
+      }
+    }
+
+    async function loadDonations() {
+      const donations = await contract.getDonations();
+      const tbody = document.getElementById("donationList");
+
+      tbody.innerHTML = "";
+
+      // ethers v6에서 반환 배열이 readonly처럼 동작할 수 있으므로
+      // Array.from()으로 일반 배열로 변환한 뒤 reverse() 처리
+      const donationArray = Array.from(donations).reverse();
+
+      donationArray.forEach(d => {
+        const time = new Date(Number(d.timestamp) * 1000)
+          .toLocaleString();
+
+        tbody.innerHTML += `
+          <tr>
+            <td>${d.donor}</td>
+            <td>${ethers.formatEther(d.amount)} ETH</td>
+            <td>${escapeHtml(d.message)}</td>
+            <td>${time}</td>
+          </tr>`;
+      });
+    }
+
+    async function withdraw() {
+      try {
+        await switchToGiwa();
+
+        const tx = await contract.withdraw();
+
+        document.getElementById("status").innerText =
+          "출금 처리 중: " + tx.hash;
+
+        await tx.wait();
+
+        document.getElementById("status").innerText = "출금 완료!";
+
+        await refreshInfo();
+      } catch (e) {
+        document.getElementById("status").innerText =
+          "오류: " + (e.shortMessage || e.message);
+      }
+    }
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>'"]/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+      }[c]));
+    }
+  </script>
+</body>
+</html>
