@@ -85,24 +85,31 @@ Dapp_BuyMeACoffee.html : 사용자 화면(UI/프론트앤드) 역할을 수행�
 1. BuyMeACoffee.sol을 compile하고 deploy한다. 이때 Deploy & Run transactions -> Environment에서 WalletConnect(MetaMask)로 수정한다.
 <img width="387" height="610" alt="deploy" src="https://github.com/user-attachments/assets/5a3e5b78-acae-402a-a172-7076b01d4620" />
 <img width="348" height="388" alt="4-deployed contract" src="https://github.com/user-attachments/assets/15368598-a5e5-4433-a554-ba555766c299" />
+
 2. deploy해서 뜬 컨트랙트 주소를 복사한다.
    
 3. 컨트랙트 주소와 BuyMeACoffee.sol의 Solidity Compiler -> Comilation Details에서 ABI 정보를 복사하여 html의 CONTRACT_ADDRESS, CONTRACT_ABI에 넣어준다. (업로드된 html은 이것들이 이미 넣어진 상태이다.)
 <img width="733" height="876" alt="4-copyABI" src="https://github.com/user-attachments/assets/aaa42d5e-f6ef-4e9a-984b-47c8ed6d52cd" />
+
 4. Dapp_BuyMeACoffee.html을 vscode의 Open With Live Server로 실행한다.
 
 ## 실행결과 : 
 1. MetaMask 지갑 연결 - MetaMask 지갑을 연결한다. 연결되면 연결 주소가 뜨고, 추가적으로 연결 주소가 Owner일 경우 Owner의 주소와 출금이 활성화된다. 아래 예시는 Owner의 지갑이 연결되었기 때문에 컨트랙트 잔액 출금이 활성화된 모습이다.
 <img width="875" height="888" alt="image" src="https://github.com/user-attachments/assets/139c8871-6d22-479f-87bb-33c1afe51940" />
+
 2. ETH send - 0.001ETH, 0.005ETH, 0.01ETH의 옵션으로 메시지를 입력하고, Coffee 후원을 할 수 있다. 후원 완료 시 아래와 같이 TX해시가 출력된다.
 <img width="828" height="601" alt="4-jan" src="https://github.com/user-attachments/assets/056976a2-2ad6-435b-b6b7-fc0486794f65" />
+
 3. 후원내역 - 후원자의 지갑주소, 금액, 메시지, 시간 등을 확인할 수 있다.
 <img width="820" height="546" alt="4-naeyuck" src="https://github.com/user-attachments/assets/31e679f2-f6ce-49a0-bfe1-51e627b13d42" />
+
 4. 컨트랙트 잔액 송금
    아래는 커피 후원으로 지갑에서 ETH가 빠져나간 상태이다.
    <img width="807" height="535" alt="4-beforemeta" src="https://github.com/user-attachments/assets/a41ae08a-abef-4480-8979-f78d24de9b1b" />
+   
    이때 컨트랙트 잔액 송금 클릭 시 출금이 완료되었다고 뜬다.
    <img width="839" height="428" alt="4-chulgeumcomplete" src="https://github.com/user-attachments/assets/33ff041d-6fb2-4d80-bcc8-e6de299022f3" />
+
    그리고 다시 지갑을 확인하면 컨트랙트에 쌓였던 ETH가 전부 들어와 있는 모습을 볼 수 있다.
    <img width="816" height="536" alt="4-aftermeta" src="https://github.com/user-attachments/assets/f7fdf284-2b62-4e81-a185-87f96cc6f0a8" />
 
