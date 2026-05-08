@@ -72,15 +72,16 @@ Dapp_BuyMeACoffee.html : 사용자 화면(UI/프론트앤드) 역할을 수행�
 1. 회원가입 후 API Key를 확인한다.
 <img width="947" height="871" alt="1" src="https://github.com/user-attachments/assets/0b06942b-b420-4971-82c1-b42959504f17" />
 
+
 ## Process - 2번 : GIWA 연동
 1. 'Process - 1번'에서 확인한 API Key를 이용하여 MetaMask 내의 GIWA Sepolia Testnet을 구성한다.
 2. API Key는 Default RPC URL에서 giwa-sepolia.nodit.io/ 뒤에 복사붙여넣기 하면 된다.
 <img width="366" height="597" alt="2-2" src="https://github.com/user-attachments/assets/cd28adaa-ef9a-4c3c-8596-074cdbaf0f3c" />
 3. 아래의 사진처럼 https://faucet.lambda256.io/giwa-sepolia에 들어가서 faucet을 받는다.
-<img width="366" height="597" alt="2-2" src="https://github.com/user-attachments/assets/ec598410-b240-4568-bf3c-bfcb6900fe70" />
+<img width="958" height="813" alt="2-1" src="https://github.com/user-attachments/assets/96575025-5486-4249-a910-060754823e41" />
 
 
-## Process - 4번
+## Process - 4번 : 나만의 Dapp 만들기
 1. BuyMeACoffee.sol을 compile하고 deploy한다. 이때 Deploy & Run transactions -> Environment에서 WalletConnect(MetaMask)로 수정한다.
 <img width="387" height="610" alt="deploy" src="https://github.com/user-attachments/assets/5a3e5b78-acae-402a-a172-7076b01d4620" />
 <img width="348" height="388" alt="4-deployed contract" src="https://github.com/user-attachments/assets/15368598-a5e5-4433-a554-ba555766c299" />
