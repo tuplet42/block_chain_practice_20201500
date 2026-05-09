@@ -53,29 +53,33 @@ Dapp_BuyMeACoffee.html : 사용자 화면(UI/프론트앤드) 역할을 수행�
 
 ## Process - 1번 : Nodit Console
 1. 회원가입 후 API Key를 확인한다.
-<img width="947" height="871" alt="1" src="https://github.com/user-attachments/assets/0b06942b-b420-4971-82c1-b42959504f17" />
+  <img width="947" height="871" alt="1" src="https://github.com/user-attachments/assets/0b06942b-b420-4971-82c1-b42959504f17" />
 
 
 ## Process - 2번 : GIWA 연동
 1. 'Process - 1번'에서 확인한 API Key를 이용하여 MetaMask 내의 GIWA Sepolia Testnet을 구성한다.
+
 2. API Key는 Default RPC URL에서 giwa-sepolia.nodit.io/ 뒤에 복사붙여넣기 하면 된다.
-<img width="366" height="597" alt="2-2" src="https://github.com/user-attachments/assets/cd28adaa-ef9a-4c3c-8596-074cdbaf0f3c" />
+  <img width="366" height="597" alt="2-2" src="https://github.com/user-attachments/assets/cd28adaa-ef9a-4c3c-8596-074cdbaf0f3c" />
+
+
 3. 아래의 사진처럼 https://faucet.lambda256.io/giwa-sepolia에 들어가서 faucet을 받는다.
-<img width="958" height="813" alt="2-1" src="https://github.com/user-attachments/assets/96575025-5486-4249-a910-060754823e41" />
+  <img width="958" height="813" alt="2-1" src="https://github.com/user-attachments/assets/96575025-5486-4249-a910-060754823e41" />
 
 
 ## Process - 4번 : Dapp 만들기
 1. BuyMeACoffeeV2.sol을 compile하고 deploy를 해야된다. 이때 Deploy & Run transactions -> Environment에서 WalletConnect(MetaMask)로 수정한다. 만약 연결 시 다른 네트워크가 잡히면 MetaMask의 네트워크를 Giwa Sepolia로 바꾸고, remix에서 지갑 연결을 끊었다가 다시 연결하면 된다.
+
 2. Deploy 옵션을 MyStableCoin으로 설정 후 Deploy해주자. 그럼 아래처럼 MyStableCoin의 컨트랙트 주소가 나오는데 이를 복사해두자.
-<img width="285" height="806" alt="4-remix배포1" src="https://github.com/user-attachments/assets/9c9068ce-8788-45ef-8965-d33e73fe70b9" />
+  <img width="285" height="806" alt="4-remix배포1" src="https://github.com/user-attachments/assets/9c9068ce-8788-45ef-8965-d33e73fe70b9" />
 
 
 3. Deploy 옵션을 BuyMeACoffeeStable로 한 뒤 Deploy하자. 이때 _stableCoin에 MyStableCoin의 주소를 붙여넣고 해야된다. deploy해서 뜬 BuyMeACoffeeStable 컨트랙트 주소도 복사해두자.
-<img width="298" height="892" alt="4-remix배포2" src="https://github.com/user-attachments/assets/179ffc30-5b2e-4ba6-a67c-a201d8c1e73a" />
+  <img width="298" height="892" alt="4-remix배포2" src="https://github.com/user-attachments/assets/179ffc30-5b2e-4ba6-a67c-a201d8c1e73a" />
 
 
 4. html의 TOKEN_ADDRESS에 MyStableCoin 컨트랙트 주소를, CONTRACT_ADDRESS에 BuyMeACoffeeStable 컨트랙트 주소와 붙여넣고 저장한다.
-<img width="552" height="105" alt="image" src="https://github.com/user-attachments/assets/90f95de2-7c1f-4d37-8bb3-d657be698fcc" />
+  <img width="552" height="105" alt="image" src="https://github.com/user-attachments/assets/90f95de2-7c1f-4d37-8bb3-d657be698fcc" />
 
 
 5. Dapp_BuyMeACoffee.html을 vscode의 Open With Live Server로 실행한다.
@@ -83,7 +87,7 @@ Dapp_BuyMeACoffee.html : 사용자 화면(UI/프론트앤드) 역할을 수행�
 
 ## 실행결과 : 
 1. MetaMask 지갑 연결 - MetaMask 지갑을 연결한다. 연결되면 연결 주소가 뜨고, 추가적으로 연결 주소가 Owner일 경우 Owner의 주소와 출금이 활성화된다. 아래 예시는 Owner의 지갑이 연결되었기 때문에 컨트랙트 잔액 출금이 활성화된 모습이다.
-<img width="881" height="919" alt="4-connectwallet" src="https://github.com/user-attachments/assets/69279319-f43a-415a-a3b1-d081a28d8327" />
+  <img width="881" height="919" alt="4-connectwallet" src="https://github.com/user-attachments/assets/69279319-f43a-415a-a3b1-d081a28d8327" />
 
 
 2. MSC send - 1MSC, 5MSC, 10MSC의 옵션으로 응원 메시지를 입력하고, Coffee 후원을 할 수 있다. 크게 1단계:MSC 사용 승인 요청, 2단계:후원 트랜잭션 승인 과정을 거쳐 후원이 가능하다. 후원이 완료되면 '후원완료!' 메시지와 함께 TX 해시가 뜬다.
@@ -92,7 +96,7 @@ Dapp_BuyMeACoffee.html : 사용자 화면(UI/프론트앤드) 역할을 수행�
 
 
 - 2단계:후원 트랜잭션 승인
-<img width="787" height="699" alt="4-coffeedonate2" src="https://github.com/user-attachments/assets/18d7eca5-cba2-4ece-af02-0f0fc16ded7c" />
+  <img width="787" height="699" alt="4-coffeedonate2" src="https://github.com/user-attachments/assets/18d7eca5-cba2-4ece-af02-0f0fc16ded7c" />
 
 
 - 결과
@@ -100,7 +104,7 @@ Dapp_BuyMeACoffee.html : 사용자 화면(UI/프론트앤드) 역할을 수행�
 
 
 3. 후원내역 - 후원자의 지갑주소, 금액, 메시지, 시간 등을 확인할 수 있다. 아래는 1MSC, 5MSC, 10MSC로 후원을 했을 때의 내역이다.
-<img width="828" height="954" alt="4-donatehistoryfinal" src="https://github.com/user-attachments/assets/8d3957b0-42be-4ef5-901f-5a89960e550b" />
+  <img width="828" height="954" alt="4-donatehistoryfinal" src="https://github.com/user-attachments/assets/8d3957b0-42be-4ef5-901f-5a89960e550b" />
 
 
 4. 컨트랙트 잔액 송금
