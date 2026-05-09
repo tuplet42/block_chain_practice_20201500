@@ -69,13 +69,17 @@ Dapp_BuyMeACoffee.html : 사용자 화면(UI/프론트앤드) 역할을 수행�
 2. Deploy 옵션을 MyStableCoin으로 설정 후 Deploy해주자. 그럼 아래처럼 MyStableCoin의 컨트랙트 주소가 나오는데 이를 복사해두자.
 <img width="285" height="806" alt="4-remix배포1" src="https://github.com/user-attachments/assets/9c9068ce-8788-45ef-8965-d33e73fe70b9" />
 
+
 3. Deploy 옵션을 BuyMeACoffeeStable로 한 뒤 Deploy하자. 이때 _stableCoin에 MyStableCoin의 주소를 붙여넣고 해야된다. deploy해서 뜬 BuyMeACoffeeStable 컨트랙트 주소도 복사해두자.
 <img width="298" height="892" alt="4-remix배포2" src="https://github.com/user-attachments/assets/179ffc30-5b2e-4ba6-a67c-a201d8c1e73a" />
+
 
 4. html의 TOKEN_ADDRESS에 MyStableCoin 컨트랙트 주소를, CONTRACT_ADDRESS에 BuyMeACoffeeStable 컨트랙트 주소와 붙여넣고 저장한다.
 <img width="552" height="105" alt="image" src="https://github.com/user-attachments/assets/90f95de2-7c1f-4d37-8bb3-d657be698fcc" />
 
+
 5. Dapp_BuyMeACoffee.html을 vscode의 Open With Live Server로 실행한다.
+
 
 ## 실행결과 : 
 1. MetaMask 지갑 연결 - MetaMask 지갑을 연결한다. 연결되면 연결 주소가 뜨고, 추가적으로 연결 주소가 Owner일 경우 Owner의 주소와 출금이 활성화된다. 아래 예시는 Owner의 지갑이 연결되었기 때문에 컨트랙트 잔액 출금이 활성화된 모습이다.
@@ -86,8 +90,10 @@ Dapp_BuyMeACoffee.html : 사용자 화면(UI/프론트앤드) 역할을 수행�
 - 1단계:MSC 사용 승인 요청
   <img width="759" height="629" alt="4-coffeedonate" src="https://github.com/user-attachments/assets/86b33041-dd09-4ed9-b605-2b25f4de6459" />
 
+
 - 2단계:후원 트랜잭션 승인
 <img width="787" height="699" alt="4-coffeedonate2" src="https://github.com/user-attachments/assets/18d7eca5-cba2-4ece-af02-0f0fc16ded7c" />
+
 
 - 결과
   <img width="827" height="298" alt="4-donateresult" src="https://github.com/user-attachments/assets/f2e1f213-af20-4f53-8b4c-c2d0dd0a4153" />
@@ -100,6 +106,7 @@ Dapp_BuyMeACoffee.html : 사용자 화면(UI/프론트앤드) 역할을 수행�
 4. 컨트랙트 잔액 송금
    아래는 커피 후원으로 지갑에서 MSC가 빠져나간 상태이다.
    <img width="829" height="903" alt="4-beforewithdraw" src="https://github.com/user-attachments/assets/9ddcf6c3-bc7b-42b1-a889-ccac870be2fb" />
+
 
    컨트랙트 잔액 송금 클릭 시 withdraw를 실행하여 Transaction Request가 뜨고,
    <img width="782" height="907" alt="4-withdraw" src="https://github.com/user-attachments/assets/7a005204-4ef3-4e97-8de6-f1a21f35cd00" />
