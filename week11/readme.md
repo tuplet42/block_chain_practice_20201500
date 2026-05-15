@@ -1,7 +1,7 @@
 # block_chain_practice_20201500
 20201500 최진우 블록체인실습 11주차 실습입니다.
 
-# Overall Structures : 
+## Overall Structures : 
 ```
 ├── README.md
 ├── DAO_Hack
@@ -292,16 +292,66 @@ function claim() public {
 <img width="522" height="416" alt="testPulljs노드터미널2" src="https://github.com/user-attachments/assets/e451eb79-48ec-4a57-8d77-cc1b211d831c" />
 
 
-## Process - 2번 : GIWA 연동
-1. 'Process - 1번'에서 확인한 API Key를 이용하여 MetaMask 내의 GIWA Sepolia Testnet을 구성한다.
+## 실습 - 2번 : Parity Wallet Hack #1 - Unathorized Initialization
+1. Vulnerability
+Parity Wallet 구조는 Wallet 컨트랙트가 직접 로직을 가지지 않고, Library 컨트랙트에 delegatecall을 수행하는 구조이다.
+취약한 WalletLibrary에는 initWallet() 함수가 존재하고, 이 함수에 접근 제어와 초기화 여부 검사가 없다.
+``` solidity
+function initWallet(address _owner, uint _required) public {
+    owner = _owner;
+    required = _required;
+}
+```
 
-2. API Key는 Default RPC URL에서 giwa-sepolia.nodit.io/ 뒤에 복사붙여넣기 하면 된다.
-  <img width="366" height="597" alt="2-2" src="https://github.com/user-attachments/assets/cd28adaa-ef9a-4c3c-8596-074cdbaf0f3c" />
+2. delegatecall Storage Structure
+```
+[Wallet Contract]                         [WalletLibrary Contract]
+storage                                   code
+---------------------------------------------------------------
+slot 0 : owner        <--- delegatecall --- initWallet()
+slot 1 : required                         execute()
+slot 2 : libraryAddress
+```
+delegatecall은 Library의 코드를 실행하지만, storage는 호출한 Wallet의 storage를 사용한다.
+따라서 공격자가 Wallet 주소에 대해 initWallet(attacker, 1)을 호출하면, Library의 코드가 실행되지만 실제로 변경되는 값은 Wallet의 owner이다.
+
+3. Attack Flow
+   1) WalletLibrary 배포
+   2) Wallet 3개 배포
+   3) 각 Wallet에 3ETH 입금
+   4) Wallet1은 정상 사용자가 초기화
+   5) Wallet2, Wallet3은 공격자가 initWallet() 호출
+   6) Wallet2, Wallet3의 owner가 attacker로 변경
+   7) attacker가 execute()를 호출하여 ETH 송금
+  
+
+4. Result
+<img width="517" height="330" alt="ParityHack1js실행결과" src="https://github.com/user-attachments/assets/bd8a682a-589d-4e8c-a05f-af84c6aef979" />
+<img width="523" height="850" alt="ParityHack1js노드터미널1" src="https://github.com/user-attachments/assets/347a118b-5b57-47f0-b1b9-92659f593ee9" />
+<img width="523" height="835" alt="ParityHack1js노드터미널2" src="https://github.com/user-attachments/assets/2ca666bc-2ee9-4dd4-a18b-0c955ca087b3" />
+<img width="522" height="670" alt="ParityHack1js노드터미널3" src="https://github.com/user-attachments/assets/0e4e2d44-6eac-43f6-8ce3-201965d6be16" />
+<img width="521" height="634" alt="ParityHack1js노드터미널4" src="https://github.com/user-attachments/assets/182ff136-2de3-4600-ad28-5fff6150b2e7" />
 
 
-3. 아래의 사진처럼 https://faucet.lambda256.io/giwa-sepolia에 들어가서 faucet을 받는다.
-  <img width="958" height="813" alt="2-1" src="https://github.com/user-attachments/assets/96575025-5486-4249-a910-060754823e41" />
+5. Fix
+initialized 변수를 추가하여 한 번 초기화된 Wallet은 다시 초기화할 수 없도록 수정하였다.
+``` solidity
+bool public initialized;
 
+function initWallet(address _owner, uint _required) public {
+    require(!initialized, "Already initialized");
+
+    owner = _owner;
+    required = _required;
+    initialized = true;
+}
+```
+
+6. Fixed Result
+공격자가 다시 initWallet()을 호출했지만 실패했고, owner는 정상 사용자 주소로 유지되었다.
+<img width="516" height="174" alt="testParityFix1js실행결과" src="https://github.com/user-attachments/assets/15384e4a-fbf7-4f18-bbd5-a2c453a0de57" />
+<img width="520" height="867" alt="testParityFix1js노드터미널1" src="https://github.com/user-attachments/assets/42e6fa68-8f5e-4737-ba5d-01bd5911d232" />
+<img width="521" height="524" alt="testParityFix1js노드터미널2" src="https://github.com/user-attachments/assets/ac4d8e9c-64dc-4807-90bc-cd39c579756b" />
 
 ## Process - 4번 : Dapp 만들기
 1. BuyMeACoffeeV2.sol을 compile하고 deploy를 해야된다. 이때 Deploy & Run transactions -> Environment에서 WalletConnect(MetaMask)로 수정한다. 만약 연결 시 다른 네트워크가 잡히면 MetaMask의 네트워크를 Giwa Sepolia로 바꾸고, remix에서 지갑 연결을 끊었다가 다시 연결하면 된다.
