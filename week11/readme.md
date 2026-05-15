@@ -207,10 +207,10 @@ npx hardhat run DAO_Hack/scripts/attack.js --network localhost
 ```
 
 
-## 실습 - 1번 : DAO Hack - Reentracy
+## 실습 - 1번 : DAO Hack - Reentrancy
 1. Vulnerability
    취약한 SimpleDAO 컨트랙트는 withdraw() 함수에서 사용자의 잔액을 차감하기 전에 먼저 ETH를 전송함.
-``` solidity
+```solidity
 (bool success, ) = msg.sender.call{value: amount}("");
 require(success, "Transfer failed");
 
@@ -242,7 +242,7 @@ DAO에 있던 10ETH와 공격지가 deposit한 1ETH까지 총 11ETH가 공격 �
 
 4. Fix 1 - Checks-Effects-Interactions
 상태 변경을 외부 호출보다 먼저 수행한다.
-``` solidity
+```solidity
 balances[msg.sender] -= amount;
 
 (bool success, ) = msg.sender.call{value: amount}("");
@@ -256,7 +256,7 @@ require(success, "Transfer failed");
 
 5. Fix 2 - Reentrancy Guard
 locked 변수를 사용하여 함수 실행 중 재진입을 막는다.
-``` solidity
+```solidity
 modifier noReentrant() {
     require(!locked, "No reentrancy");
     locked = true;
@@ -272,7 +272,7 @@ modifier noReentrant() {
 
 6. Fix 3 - Pull-over-push
 컨트랙트가 직접 ETH를 밀어 보내는 대신, 사용자가 출금을 요청하고 나중에 직접 claim하는 구조로 변경하였다.
-``` solidity
+```solidity
 function requestWithdraw(uint amount) public {
     balances[msg.sender] -= amount;
     pendingWithdrawals[msg.sender] += amount;
@@ -292,11 +292,11 @@ function claim() public {
 <img width="522" height="416" alt="testPulljs노드터미널2" src="https://github.com/user-attachments/assets/e451eb79-48ec-4a57-8d77-cc1b211d831c" />
 
 
-## 실습 - 2번 : Parity Wallet Hack #1 - Unathorized Initialization
+## 실습 - 2번 : Parity Wallet Hack #1 - Unauthorized Initialization
 1. Vulnerability
 Parity Wallet 구조는 Wallet 컨트랙트가 직접 로직을 가지지 않고, Library 컨트랙트에 delegatecall을 수행하는 구조이다.
 취약한 WalletLibrary에는 initWallet() 함수가 존재하고, 이 함수에 접근 제어와 초기화 여부 검사가 없다.
-``` solidity
+```solidity
 function initWallet(address _owner, uint _required) public {
     owner = _owner;
     required = _required;
@@ -335,7 +335,7 @@ delegatecall은 Library의 코드를 실행하지만, storage는 호출한 Walle
 
 5. Fix
 initialized 변수를 추가하여 한 번 초기화된 Wallet은 다시 초기화할 수 없도록 수정하였다.
-``` solidity
+```solidity
 bool public initialized;
 
 function initWallet(address _owner, uint _required) public {
@@ -356,7 +356,7 @@ function initWallet(address _owner, uint _required) public {
 ## 실습 - 3번 : Parity Wallet Hack #2 - Library Selfdestruct
 1. Vulnerability
 세 번째 실습은 여러 Wallet이 하나의 공유 Library에 의존하고, 해당 Library에 public kill()함수가 존재하는 구조를 재현하였다.
-``` solidity
+```solidity
 function kill() public {
     selfdestruct(payable(msg.sender));
 }
@@ -364,9 +364,9 @@ function kill() public {
 공격자가 Library 자체에 initWallet()을 호출하여 Library의 owner가 된 후, kill()을 호출하면 Library가 제거되어 모든 Wallet의 delegatecall 대상이 사라지는 구조이다.
 
 2. Attack Flow
-    1) WalletLibaryKill 배포
+    1) WalletLibraryKill 배포
     2) Wallet 3개 배포
-    3) 모든 Wallet이 같은 Libary 주소를 참조
+    3) 모든 Wallet이 같은 Library 주소를 참조
     4) 각 Wallet에 3 ETH 입금
     5) 정상 사용자가 Wallet들을 초기화
     6) 공격자가 Library 자체에 initWallet(attacker, 1) 호출
@@ -403,7 +403,7 @@ Wallet 내부 ETH는 그대로 남아 있었지만, 출금 로직을 실행할 �
 1) selfdestruct 제거
 2) initWallet() 재초기화 방지
 3) 중요 함수에 접근 제어 추가
-``` solidity
+```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
