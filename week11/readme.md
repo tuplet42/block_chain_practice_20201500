@@ -45,8 +45,11 @@ Ethereum에서 발생했던 대표적인 스마트 컨트랙트 보안 사고를
 
 ## Environment
 node
+
 npm
+
 hardhat@2.22.5
+
 solidity 0.8.24
 
 ## 역할
