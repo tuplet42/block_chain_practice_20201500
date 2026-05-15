@@ -442,4 +442,3 @@ contract FixedWalletLibraryKill {
 3. 초기화 함수에는 반드시 접근 제어 또는 재초기화 방지 로직이 필요하다.
 4. 여러 Wallet이 하나의 Library에 의존하는 구조에서는 Library의 취약점이 전체 Wallet에 영향을 줄 수 있다.
 5. selfdestruct는 과거에는 컨트랙트 코드를 제거할 수 있었지만, 최신 EVM에서는 동작이 변경되었으므로 과거 취약점 재현 결과가 달라질 수 있다.
-   <img width="825" height="732" alt="4-afterwithdraw" src="https://github.com/user-attachments/assets/8756fdf2-0003-4566-b437-dbceb56f9bc6" />
