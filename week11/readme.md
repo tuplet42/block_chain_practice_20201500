@@ -207,9 +207,89 @@ npx hardhat run DAO_Hack/scripts/attack.js --network localhost
 ```
 
 
-## Process - 1번 : Nodit Console
-1. 회원가입 후 API Key를 확인한다.
-  <img width="947" height="871" alt="1" src="https://github.com/user-attachments/assets/0b06942b-b420-4971-82c1-b42959504f17" />
+## 실습 - 1번 : DAO Hack - Reentracy
+1. Vulnerability
+   취약한 SimpleDAO 컨트랙트는 withdraw() 함수에서 사용자의 잔액을 차감하기 전에 먼저 ETH를 전송함.
+``` solidity
+(bool success, ) = msg.sender.call{value: amount}("");
+require(success, "Transfer failed");
+
+balances[msg.sender] -= amount;
+```
+  이 구조에서는 공격 컨트랙트가 ETH 받는 순간 receive() 함수에서 다시 withdraw() 호출 가능.
+  즉, 잔액이 차감되지 전에 반복 출금이 가능해짐.
+
+2. Attack Flow
+   1) SimpleDAO 배포
+   2) DAO에 10ETH 입금
+   3) AttackDAO 배포
+   4) 공격 컨트랙트가 1ETH를 deposit
+   5) withdraw() 호출
+   6) receive()에서 재귀적으로 withdraw() 재호출
+   7) DAO 자금 drain
+
+3. Result
+DAO에 있던 10ETH와 공격지가 deposit한 1ETH까지 총 11ETH가 공격 컨트랙트로 이동하였다.
+- deploy.js 실행
+<img width="535" height="120" alt="deployjs실행결과" src="https://github.com/user-attachments/assets/35a6bd8c-375c-444d-b3eb-f82e077c9e28" />
+<img width="549" height="852" alt="deployjs노드터미널" src="https://github.com/user-attachments/assets/5c6b997e-2394-4e3b-bd9f-0ea2725b5a1d" />
+
+
+- attack.js 실행
+<img width="541" height="97" alt="attackjs실행결과" src="https://github.com/user-attachments/assets/862896f0-54d0-483f-9379-410300abdbea" />
+<img width="557" height="526" alt="attackjs노드터미널" src="https://github.com/user-attachments/assets/f203616a-d0a3-4786-ad8e-74ddc32bef94" />
+
+
+4. Fix 1 - Checks-Effects-Interactions
+상태 변경을 외부 호출보다 먼저 수행한다.
+``` solidity
+balances[msg.sender] -= amount;
+
+(bool success, ) = msg.sender.call{value: amount}("");
+require(success, "Transfer failed");
+```
+- result    
+    <img width="520" height="153" alt="testCEIjs실행결과" src="https://github.com/user-attachments/assets/4603e959-6129-41ef-9b0b-6d689a707bc9" />
+    <img width="519" height="511" alt="testCEIjs노드터미널1" src="https://github.com/user-attachments/assets/5426f4bd-d420-4d7e-8d53-b5c55551a03c" />
+    <img width="531" height="756" alt="testCEIjs노드터미널2" src="https://github.com/user-attachments/assets/8c8b1268-e0a9-4e9f-aac8-be950a053852" />
+
+
+5. Fix 2 - Reentrancy Guard
+locked 변수를 사용하여 함수 실행 중 재진입을 막는다.
+``` solidity
+modifier noReentrant() {
+    require(!locked, "No reentrancy");
+    locked = true;
+    _;
+    locked = false;
+}
+```
+- Result
+<img width="520" height="157" alt="testGuardjs실행결과" src="https://github.com/user-attachments/assets/2ba89840-b5ad-4010-affe-20a97e570c8c" />
+<img width="519" height="794" alt="testGuard노드터미널1" src="https://github.com/user-attachments/assets/f9998997-79cb-452c-8dab-49ce91abe300" />
+<img width="520" height="478" alt="testGuard노드터미널2" src="https://github.com/user-attachments/assets/353437d4-13a1-44ea-9279-4ba81220285a" />
+
+
+6. Fix 3 - Pull-over-push
+컨트랙트가 직접 ETH를 밀어 보내는 대신, 사용자가 출금을 요청하고 나중에 직접 claim하는 구조로 변경하였다.
+``` solidity
+function requestWithdraw(uint amount) public {
+    balances[msg.sender] -= amount;
+    pendingWithdrawals[msg.sender] += amount;
+}
+
+function claim() public {
+    uint amount = pendingWithdrawals[msg.sender];
+    pendingWithdrawals[msg.sender] = 0;
+
+    (bool success, ) = msg.sender.call{value: amount}("");
+    require(success, "Transfer failed");
+}
+```
+- Result
+<img width="518" height="155" alt="testPulljs실행결과" src="https://github.com/user-attachments/assets/9b4aaea2-d4e7-4ec3-ab17-7dcbf928b431" />
+<img width="526" height="832" alt="testPulljs노드터미널1" src="https://github.com/user-attachments/assets/39bb75ee-af77-46ac-9cf8-2f1b66215c47" />
+<img width="522" height="416" alt="testPulljs노드터미널2" src="https://github.com/user-attachments/assets/e451eb79-48ec-4a57-8d77-cc1b211d831c" />
 
 
 ## Process - 2번 : GIWA 연동
