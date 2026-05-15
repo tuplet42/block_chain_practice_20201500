@@ -353,54 +353,93 @@ function initWallet(address _owner, uint _required) public {
 <img width="520" height="867" alt="testParityFix1js노드터미널1" src="https://github.com/user-attachments/assets/42e6fa68-8f5e-4737-ba5d-01bd5911d232" />
 <img width="521" height="524" alt="testParityFix1js노드터미널2" src="https://github.com/user-attachments/assets/ac4d8e9c-64dc-4807-90bc-cd39c579756b" />
 
-## Process - 4번 : Dapp 만들기
-1. BuyMeACoffeeV2.sol을 compile하고 deploy를 해야된다. 이때 Deploy & Run transactions -> Environment에서 WalletConnect(MetaMask)로 수정한다. 만약 연결 시 다른 네트워크가 잡히면 MetaMask의 네트워크를 Giwa Sepolia로 바꾸고, remix에서 지갑 연결을 끊었다가 다시 연결하면 된다.
+## 실습 - 3번 : Parity Wallet Hack #2 - Library Selfdestruct
+1. Vulnerability
+세 번째 실습은 여러 Wallet이 하나의 공유 Library에 의존하고, 해당 Library에 public kill()함수가 존재하는 구조를 재현하였다.
+``` solidity
+function kill() public {
+    selfdestruct(payable(msg.sender));
+}
+```
+공격자가 Library 자체에 initWallet()을 호출하여 Library의 owner가 된 후, kill()을 호출하면 Library가 제거되어 모든 Wallet의 delegatecall 대상이 사라지는 구조이다.
 
-2. Deploy 옵션을 MyStableCoin으로 설정 후 Deploy해주자. 그럼 아래처럼 MyStableCoin의 컨트랙트 주소가 나오는데 이를 복사해두자.
-  <img width="285" height="806" alt="4-remix배포1" src="https://github.com/user-attachments/assets/9c9068ce-8788-45ef-8965-d33e73fe70b9" />
+2. Attack Flow
+    1) WalletLibaryKill 배포
+    2) Wallet 3개 배포
+    3) 모든 Wallet이 같은 Libary 주소를 참조
+    4) 각 Wallet에 3 ETH 입금
+    5) 정상 사용자가 Wallet들을 초기화
+    6) 공격자가 Library 자체에 initWallet(attacker, 1) 호출
+    7) 공격자가 Library의 owner가 됨
+    8) 공격자가 kill() 호출
+    9) Wallet들이 delegatecall할 Library code를 잃어 기능이 정지됨
 
+3. Actual Result in Current Environment
+현재 Hardhat / Solidity 환경에서는 selfdestruct 동작이 과거 Ethereum과 다르게 처리된다.
+특히 Cancun 이후의 EVM에서는 selfdestruct가 기존 컨트랙트 코드를 완전히 삭제하지 않는다.
 
-3. Deploy 옵션을 BuyMeACoffeeStable로 한 뒤 Deploy하자. 이때 _stableCoin에 MyStableCoin의 주소를 붙여넣고 해야된다. deploy해서 뜬 BuyMeACoffeeStable 컨트랙트 주소도 복사해두자.
-  <img width="298" height="892" alt="4-remix배포2" src="https://github.com/user-attachments/assets/179ffc30-5b2e-4ba6-a67c-a201d8c1e73a" />
+- result
+<img width="533" height="801" alt="ParityHack2js실행결과" src="https://github.com/user-attachments/assets/78043260-fb64-4825-ba10-0234ead1a3e2" />
+<img width="520" height="602" alt="ParityHack2js노드터미널1" src="https://github.com/user-attachments/assets/0b277adc-99ca-4aaf-8058-d38f183c7b63" />
+<img width="525" height="497" alt="ParityHack2js노드터미널2" src="https://github.com/user-attachments/assets/8ca6622c-1a37-4aa8-a11a-da93bb9a4124" />
+<img width="518" height="801" alt="ParityHack2js노드터미널3" src="https://github.com/user-attachments/assets/0161b6a5-a884-4c5c-b36e-59f179fce711" />
+<img width="521" height="739" alt="ParityHack2js노드터미널4" src="https://github.com/user-attachments/assets/b23e7ec6-3fd9-4122-978c-cd9e0a4ca608" />
+<img width="521" height="763" alt="ParityHack2js노드터미널5" src="https://github.com/user-attachments/assets/f9011c8b-5ec5-4d8d-8c8e-5fcb03674dc5" />
+<img width="523" height="76" alt="ParityHack2js노드터미널6" src="https://github.com/user-attachments/assets/01cfd25c-e0cb-45c0-9753-7db917e399f0" />
 
+즉, 공격자는 Library의 owner가 되었고 kill() 호출도 수행했지만, 현재 환경에서는 Library bytecode가 삭제되지 않았다.
+그 결과 Wallet의 delegatecall이 계속 동작했고, 과거 Parity Wallet freeze 현상이 완전히 재현되지는 않았다.
 
-4. html의 TOKEN_ADDRESS에 MyStableCoin 컨트랙트 주소를, CONTRACT_ADDRESS에 BuyMeACoffeeStable 컨트랙트 주소와 붙여넣고 저장한다.
-  <img width="552" height="105" alt="image" src="https://github.com/user-attachments/assets/90f95de2-7c1f-4d37-8bb3-d657be698fcc" />
+4. Analysis
+과거 Parity Wallet Hack #2에서는 Library 컨트랙트가 selfdestruct되면서 해당 Library를 참조하던 모든 Wallet이 로직을 잃었다.
+Wallet 내부 ETH는 그대로 남아 있었지만, 출금 로직을 실행할 수 없었기 때문에 자금이 도난된 것이 아니라 동결되었다.
 
-
-5. Dapp_BuyMeACoffee.html을 vscode의 Open With Live Server로 실행한다.
-
-
-## 실행결과 : 
-1. MetaMask 지갑 연결 - MetaMask 지갑을 연결한다. 연결되면 연결 주소가 뜨고, 추가적으로 연결 주소가 Owner일 경우 Owner의 주소와 출금이 활성화된다. 아래 예시는 Owner의 지갑이 연결되었기 때문에 컨트랙트 잔액 출금이 활성화된 모습이다.
-  <img width="881" height="919" alt="4-connectwallet" src="https://github.com/user-attachments/assets/69279319-f43a-415a-a3b1-d081a28d8327" />
-
-
-2. MSC send - 1MSC, 5MSC, 10MSC의 옵션으로 응원 메시지를 입력하고, Coffee 후원을 할 수 있다. 크게 1단계:MSC 사용 승인 요청, 2단계:후원 트랜잭션 승인 과정을 거쳐 후원이 가능하다. 후원이 완료되면 '후원완료!' 메시지와 함께 TX 해시가 뜬다.
-- 1단계:MSC 사용 승인 요청
-  <img width="759" height="629" alt="4-coffeedonate" src="https://github.com/user-attachments/assets/86b33041-dd09-4ed9-b605-2b25f4de6459" />
-
-
-- 2단계:후원 트랜잭션 승인
-  <img width="787" height="699" alt="4-coffeedonate2" src="https://github.com/user-attachments/assets/18d7eca5-cba2-4ece-af02-0f0fc16ded7c" />
-
-
-- 결과
-  <img width="827" height="298" alt="4-donateresult" src="https://github.com/user-attachments/assets/f2e1f213-af20-4f53-8b4c-c2d0dd0a4153" />
-
-
-3. 후원내역 - 후원자의 지갑주소, 금액, 메시지, 시간 등을 확인할 수 있다. 아래는 1MSC, 5MSC, 10MSC로 후원을 했을 때의 내역이다.
-  <img width="828" height="954" alt="4-donatehistoryfinal" src="https://github.com/user-attachments/assets/8d3957b0-42be-4ef5-901f-5a89960e550b" />
-
-
-4. 컨트랙트 잔액 송금
-   아래는 커피 후원으로 지갑에서 MSC가 빠져나간 상태이다.
-   <img width="829" height="903" alt="4-beforewithdraw" src="https://github.com/user-attachments/assets/9ddcf6c3-bc7b-42b1-a889-ccac870be2fb" />
-
-
-   컨트랙트 잔액 송금 클릭 시 withdraw를 실행하여 Transaction Request가 뜨고,
-   <img width="782" height="907" alt="4-withdraw" src="https://github.com/user-attachments/assets/7a005204-4ef3-4e97-8de6-f1a21f35cd00" />
+이번 실습에서는 최신 EVM의 selfdestruct 동작 변경으로 인해 같은 현상이 완전히 발생하지 않았다.
+하지만 하나의 공유 Library에 여러 Wallet이 의존하고, Library에 위험한 public 함수가 존재할 경우 전체 시스템에 치명적인 영향을 줄 수 있음을 확인하였다.
 
 
-   이를 confirm하면 owner의 지갑으로 컨트랙트에 쌓였던 MSC가 전부 들어와 있는 모습을 볼 수 있다.
+5. Fix
+수정 방향은 다음과 같다.
+1) selfdestruct 제거
+2) initWallet() 재초기화 방지
+3) 중요 함수에 접근 제어 추가
+``` solidity
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract FixedWalletLibraryKill {
+    address public owner;
+    uint public required;
+    bool public initialized;
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner");
+        _;
+    }
+
+    function initWallet(address _owner, uint _required) public {
+        require(!initialized, "Already initialized");
+
+        owner = _owner;
+        required = _required;
+        initialized = true;
+    }
+
+    function execute(address payable to, uint amount) public onlyOwner {
+        (bool success, ) = to.call{value: amount}("");
+        require(success, "Transfer failed");
+    }
+
+    // selfdestruct function removed
+}
+```
+
+
+## Conclusion
+이번 실습을 통해 다음 내용을 확인하였다.
+1. Reentrancy는 외부 호출 전에 상태 변경을 하지 않을 때 발생할 수 있다.
+2. delegatecall은 Library의 코드를 실행하지만, storage는 호출한 컨트랙트의 storage를 사용한다.
+3. 초기화 함수에는 반드시 접근 제어 또는 재초기화 방지 로직이 필요하다.
+4. 여러 Wallet이 하나의 Library에 의존하는 구조에서는 Library의 취약점이 전체 Wallet에 영향을 줄 수 있다.
+5. selfdestruct는 과거에는 컨트랙트 코드를 제거할 수 있었지만, 최신 EVM에서는 동작이 변경되었으므로 과거 취약점 재현 결과가 달라질 수 있다.
    <img width="825" height="732" alt="4-afterwithdraw" src="https://github.com/user-attachments/assets/8756fdf2-0003-4566-b437-dbceb56f9bc6" />
