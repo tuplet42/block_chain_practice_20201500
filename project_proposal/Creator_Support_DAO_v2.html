@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creator Support DAO</title>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    max-width: 1050px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #f5f5f5;
+}
+
+section {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+h2 { margin-top: 0; }
+
+button.main-btn {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #222;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+button.main-btn:hover { background: #444; }
+
+textarea, input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 14px;
+    margin-top: 10px;
+    background: #fafafa;
+}
+
+.card h3 { margin: 0 0 6px 0; }
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.info-card {
+    background: #f0f0f0;
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+}
+
+.info-card .val {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 4px;
+}
+
+.info-card .lbl {
+    font-size: 12px;
+    color: #666;
+}
+
+.donate-area {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.donate-box {
+    border: 1px solid #ddd;
+    border-radius: 14px;
+    padding: 16px;
+    background: #fafafa;
+}
+
+.donate-box.general { border-color: #b8d8c8; background: #f2fbf6; }
+.donate-box.proposal { border-color: #c8d6ff; background: #eef3ff; }
+
+.donate-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.donate-btn {
+    flex: 1;
+    padding: 16px 8px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: transform 0.1s, opacity 0.1s;
+}
+
+.donate-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.donate-btn .emoji { font-size: 24px; }
+.donate-btn .amount { font-size: 12px; opacity: 0.85; }
+
+.btn-small  { background: #4a7c6f; color: white; }
+.btn-large  { background: #7a5c3e; color: white; }
+.btn-whale  { background: #2c4a7c; color: white; }
+
+.custom-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    margin-top: 10px;
+}
+
+.custom-row input {
+    flex: 1;
+    margin-top: 0;
+}
+
+.custom-row button {
+    width: 150px;
+    margin-top: 0;
+    border: none;
+    border-radius: 8px;
+    background: #2c4a7c;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.vote-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.vote-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    color: white;
+}
+
+.vote-yes { background: #2e7d32; }
+.vote-no  { background: #c62828; }
+
+.exec-btn, .withdraw-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #555;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.withdraw-btn.general { background: #4a7c6f; }
+.withdraw-btn.proposal { background: #2c4a7c; }
+
+.status-badge, .type-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    color: white;
+}
+
+.status-active   { background: #555; }
+.status-passed   { background: #2e7d32; }
+.status-rejected { background: #c62828; }
+.status-executed { background: #b8860b; }
+
+.type-general { background: #4a7c6f; }
+.type-proposal { background: #2c4a7c; }
+
+.note {
+    font-size: 12px;
+    color: #777;
+    margin-top: 8px;
+}
+
+@media (max-width: 760px) {
+    .donate-area { grid-template-columns: 1fr; }
+    .donate-buttons { flex-direction: column; }
+    .custom-row { flex-direction: column; }
+    .custom-row button { width: 100%; }
+}
+</style>
+</head>
+
+<body>
+
+<h1>☕ Creator Support DAO</h1>
+
+<section>
+<h2>1. MetaMask 연결</h2>
+<button class="main-btn" onclick="connectWallet()">MetaMask 연결</button>
+<p style="margin-top:12px; font-size:14px; color:#444;">
+    연결 주소: <strong><span id="account">-</span></strong><br>
+    네트워크: <span id="network">-</span><br>
+    DAO: <span id="daoAddress" style="font-size:12px;">-</span><br>
+    COFFEE: <span id="coffeeAddress" style="font-size:12px;">-</span>
+</p>
+</section>
+
+<section>
+<h2>2. 내 정보 / 컨트랙트 잔액</h2>
+<button class="main-btn" onclick="loadMyInfo()">새로고침</button>
+<div class="info-grid">
+    <div class="info-card">
+        <div class="lbl">COFFEE 잔액</div>
+        <div class="val" id="coffeeBalance">-</div>
+    </div>
+    <div class="info-card">
+        <div class="lbl">누적 후원</div>
+        <div class="val" id="totalDonated">-</div>
+    </div>
+    <div class="info-card">
+        <div class="lbl">등급</div>
+        <div class="val" id="vipStatus">-</div>
+    </div>
+    <div class="info-card">
+        <div class="lbl">일반 후원 잔액</div>
+        <div class="val" id="generalBalance">-</div>
+    </div>
+    <div class="info-card">
+        <div class="lbl">Proposal 전용 잔액</div>
+        <div class="val" id="proposalBalance">-</div>
+    </div>
+</div>
+<p class="note">* 1 ETH 후원 = 100 COFFEE 지급 / VIP 기준: 누적 1 ETH 이상 / Proposal 생성 비용: 10 COFFEE</p>
+</section>
+
+<section>
+<h2>3. ETH 후원</h2>
+<p style="font-size:14px; color:#555; margin-top:0;">
+    일반 후원은 owner가 바로 출금 가능하고, Proposal 전용 후원은 Proposal 실행 이후에만 출금할 수 있습니다.
+</p>
+
+<div class="donate-area">
+    <div class="donate-box general">
+        <h3>일반 후원</h3>
+        <p class="note">창작자에게 직접 전달되는 후원금입니다.</p>
+        <div class="donate-buttons">
+            <button class="donate-btn btn-small" onclick="donateGeneral('0.001')">
+                <span class="emoji">☕</span>
+                <span>Small</span>
+                <span class="amount">0.001 ETH</span>
+            </button>
+            <button class="donate-btn btn-large" onclick="donateGeneral('0.003')">
+                <span class="emoji">☕☕</span>
+                <span>Large</span>
+                <span class="amount">0.003 ETH</span>
+            </button>
+            <button class="donate-btn btn-whale" onclick="donateGeneral('0.01')">
+                <span class="emoji">🐳</span>
+                <span>Whale</span>
+                <span class="amount">0.01 ETH</span>
+            </button>
+        </div>
+        <div class="custom-row">
+            <input id="customGeneralAmount" type="number" step="0.001" min="0.001" placeholder="직접 입력 예: 0.02">
+            <button onclick="donateCustomGeneral()">직접 후원</button>
+        </div>
+    </div>
+
+    <div class="donate-box proposal">
+        <h3>Proposal 전용 후원</h3>
+        <p class="note">투표로 통과 및 실행된 Proposal이 있어야 출금 가능한 후원금입니다.</p>
+        <div class="donate-buttons">
+            <button class="donate-btn btn-small" onclick="donateProposalFund('0.001')">
+                <span class="emoji">🗳️</span>
+                <span>Small</span>
+                <span class="amount">0.001 ETH</span>
+            </button>
+            <button class="donate-btn btn-large" onclick="donateProposalFund('0.003')">
+                <span class="emoji">🗳️🗳️</span>
+                <span>Large</span>
+                <span class="amount">0.003 ETH</span>
+            </button>
+            <button class="donate-btn btn-whale" onclick="donateProposalFund('0.01')">
+                <span class="emoji">🐳</span>
+                <span>Whale</span>
+                <span class="amount">0.01 ETH</span>
+            </button>
+        </div>
+        <div class="custom-row">
+            <input id="customProposalAmount" type="number" step="0.001" min="0.001" placeholder="직접 입력 예: 0.02">
+            <button onclick="donateCustomProposal()">직접 후원</button>
+        </div>
+    </div>
+</div>
+
+<textarea id="donateMessage" rows="2" placeholder="후원 메시지 (선택)"></textarea>
+</section>
+
+<section>
+<h2>4. 후원 로그</h2>
+<button class="main-btn" onclick="loadDonationLogs()">후원 로그 불러오기</button>
+<div id="donationLogList"></div>
+</section>
+
+<section>
+<h2>5. Proposal 생성</h2>
+<p class="note">VIP만 생성 가능하며, 생성 시 10 COFFEE가 소모됩니다.</p>
+<input id="proposalTitle" placeholder="Proposal 제목">
+<textarea id="proposalDescription" rows="3" placeholder="Proposal 설명"></textarea>
+<button class="main-btn" onclick="createProposal()">Proposal 생성</button>
+</section>
+
+<section>
+<h2>6. Proposal 목록 / 실행</h2>
+<button class="main-btn" onclick="loadProposals()">Proposal 불러오기</button>
+<div id="proposalList"></div>
+</section>
+
+<section>
+<h2>7. Owner 출금</h2>
+<p class="note">일반 후원금은 바로 출금 가능. Proposal 전용 후원금은 실행 완료된 Proposal ID가 필요합니다.</p>
+<button class="withdraw-btn general" onclick="withdrawGeneral()">일반 후원금 출금</button>
+<input id="withdrawProposalId" type="number" min="0" placeholder="실행 완료된 Proposal ID 입력 예: 0">
+<button class="withdraw-btn proposal" onclick="withdrawProposalFund()">Proposal 전용 후원금 출금</button>
+</section>
+
+<script>
+
+const DAO_ADDRESS    = "0xBaaCAa6C63A7F3d4625E4e7B86615e4f594e39c1";
+const COFFEE_ADDRESS = "0x6E7B0d956641A29A31498B352BAF10B182b1d02B";
+const SEPOLIA_CHAIN_ID = "0xaa36a7";
+
+const DAO_ABI = [
+    "function donate(string message) payable",
+    "function donateToProposalFund(string message) payable",
+    "function createProposal(string title, string description)",
+    "function vote(uint256 proposalId, bool support)",
+    "function executeProposal(uint256 proposalId)",
+    "function withdrawGeneral()",
+    "function withdrawProposalFund(uint256 proposalId)",
+    "function totalDonated(address user) view returns (uint256)",
+    "function isVIP(address user) view returns (bool)",
+    "function generalDonationBalance() view returns (uint256)",
+    "function proposalDonationBalance() view returns (uint256)",
+    "function getDonationsCount() view returns (uint256)",
+    "function getProposalsCount() view returns (uint256)",
+    "function donations(uint256 index) view returns (address donor, uint256 amount, string message, uint256 timestamp, bool forProposal)",
+    "function proposals(uint256 index) view returns (uint256 id, address proposer, string title, string description, uint256 yesVotes, uint256 noVotes, bool executed)"
+];
+
+const ERC20_ABI = [
+    "function balanceOf(address account) view returns (uint256)"
+];
+
+let provider, signer, account, dao, coffee;
+
+async function switchToSepolia() {
+    try {
+        await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: SEPOLIA_CHAIN_ID }]
+        });
+    } catch (err) {
+        if (err.code === 4902) {
+            await window.ethereum.request({
+                method: "wallet_addEthereumChain",
+                params: [{
+                    chainId: SEPOLIA_CHAIN_ID,
+                    chainName: "Sepolia Testnet",
+                    nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+                    rpcUrls: ["https://rpc.sepolia.org"],
+                    blockExplorerUrls: ["https://sepolia.etherscan.io"]
+                }]
+            });
+        } else {
+            throw err;
+        }
+    }
+}
+
+async function connectWallet() {
+    try {
+        if (!window.ethereum) { alert("MetaMask 설치 필요"); return; }
+
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+
+        const chainId = await window.ethereum.request({ method: "eth_chainId" });
+        if (chainId !== SEPOLIA_CHAIN_ID) {
+            alert("Sepolia 네트워크로 전환합니다...");
+            await switchToSepolia();
+        }
+
+        provider = new ethers.BrowserProvider(window.ethereum);
+        signer   = await provider.getSigner();
+        account  = await signer.getAddress();
+
+        const network = await provider.getNetwork();
+
+        document.getElementById("account").innerText = account;
+        document.getElementById("network").innerText = `${network.name} (chainId: ${network.chainId})`;
+        document.getElementById("daoAddress").innerText = DAO_ADDRESS;
+        document.getElementById("coffeeAddress").innerText = COFFEE_ADDRESS;
+
+        dao    = new ethers.Contract(DAO_ADDRESS, DAO_ABI, signer);
+        coffee = new ethers.Contract(COFFEE_ADDRESS, ERC20_ABI, signer);
+
+        alert("MetaMask 연결 성공");
+
+        await loadMyInfo();
+        await loadProposals();
+        await loadDonationLogs();
+
+    } catch (err) {
+        console.error(err);
+        alert("연결 실패:\n" + (err.shortMessage || err.message));
+    }
+}
+
+function needConnect() {
+    if (!dao || !account) { alert("먼저 MetaMask 연결"); return true; }
+    return false;
+}
+
+async function loadMyInfo() {
+    if (needConnect()) return;
+
+    const bal = await coffee.balanceOf(account);
+    const donated = await dao.totalDonated(account);
+    const vip = await dao.isVIP(account);
+    const generalBal = await dao.generalDonationBalance();
+    const proposalBal = await dao.proposalDonationBalance();
+
+    document.getElementById("coffeeBalance").innerText = ethers.formatUnits(bal, 18);
+    document.getElementById("totalDonated").innerText = ethers.formatEther(donated) + " ETH";
+    document.getElementById("vipStatus").innerText = vip ? "⭐ VIP" : "일반";
+    document.getElementById("generalBalance").innerText = ethers.formatEther(generalBal) + " ETH";
+    document.getElementById("proposalBalance").innerText = ethers.formatEther(proposalBal) + " ETH";
+}
+
+async function donateGeneral(amount) {
+    if (needConnect()) return;
+    await sendDonation("general", amount);
+}
+
+async function donateProposalFund(amount) {
+    if (needConnect()) return;
+    await sendDonation("proposal", amount);
+}
+
+async function sendDonation(type, amount) {
+    const message = document.getElementById("donateMessage").value || "응원합니다!";
+
+    try {
+        const tx = type === "general"
+            ? await dao.donate(message, { value: ethers.parseEther(amount) })
+            : await dao.donateToProposalFund(message, { value: ethers.parseEther(amount) });
+
+        await tx.wait();
+
+        alert(`${type === "general" ? "일반 후원" : "Proposal 전용 후원"} 완료! (${amount} ETH)`);
+
+        document.getElementById("donateMessage").value = "";
+
+        await loadMyInfo();
+        await loadDonationLogs();
+
+    } catch (err) {
+        console.error(err);
+        alert("후원 실패:\n" + (err.shortMessage || err.message));
+    }
+}
+
+async function donateCustomGeneral() {
+    const amount = document.getElementById("customGeneralAmount").value;
+
+    if (!amount || Number(amount) <= 0) {
+        alert("후원 금액을 입력하세요.");
+        return;
+    }
+
+    await donateGeneral(amount);
+    document.getElementById("customGeneralAmount").value = "";
+}
+
+async function donateCustomProposal() {
+    const amount = document.getElementById("customProposalAmount").value;
+
+    if (!amount || Number(amount) <= 0) {
+        alert("후원 금액을 입력하세요.");
+        return;
+    }
+
+    await donateProposalFund(amount);
+    document.getElementById("customProposalAmount").value = "";
+}
+
+async function loadDonationLogs() {
+    if (needConnect()) return;
+
+    const list = document.getElementById("donationLogList");
+    list.innerHTML = "";
+
+    try {
+        const count = Number(await dao.getDonationsCount());
+
+        if (count === 0) {
+            list.innerHTML = "<p style='color:#888; margin-top:10px;'>아직 후원 로그가 없습니다.</p>";
+            return;
+        }
+
+        for (let i = count - 1; i >= 0; i--) {
+            const d = await dao.donations(i);
+            const date = new Date(Number(d.timestamp) * 1000).toLocaleString();
+            const typeText = d.forProposal ? "Proposal 전용 후원" : "일반 후원";
+            const typeClass = d.forProposal ? "type-proposal" : "type-general";
+
+            list.innerHTML += `
+            <div class="card">
+                <span class="type-badge ${typeClass}">${typeText}</span>
+                <h3 style="margin-top:8px;">${ethers.formatEther(d.amount)} ETH</h3>
+                <p style="color:#555;">"${d.message}"</p>
+                <p style="font-size:12px; color:#777; word-break:break-all;">후원자: ${d.donor}</p>
+                <p style="font-size:12px; color:#777;">시간: ${date}</p>
+            </div>`;
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("후원 로그 조회 실패:\n" + (err.shortMessage || err.message));
+    }
+}
+
+async function createProposal() {
+    if (needConnect()) return;
+
+    const title = document.getElementById("proposalTitle").value;
+    const description = document.getElementById("proposalDescription").value;
+
+    if (!title || !description) {
+        alert("제목과 설명을 입력해주세요.");
+        return;
+    }
+
+    try {
+        const tx = await dao.createProposal(title, description);
+        await tx.wait();
+
+        alert("Proposal 생성 완료: 10 COFFEE가 소모되었습니다.");
+
+        document.getElementById("proposalTitle").value = "";
+        document.getElementById("proposalDescription").value = "";
+
+        await loadMyInfo();
+        await loadProposals();
+
+    } catch (err) {
+        console.error(err);
+        alert("Proposal 생성 실패:\n" + (err.shortMessage || err.message));
+    }
+}
+
+function getStatus(p) {
+    if (p.executed) return ["실행 완료 ★", "status-executed"];
+
+    const yes = Number(p.yesVotes);
+    const no = Number(p.noVotes);
+
+    if (yes === 0 && no === 0) return ["진행중 ●", "status-active"];
+    if (yes > no) return ["통과 ✓", "status-passed"];
+    if (no > yes) return ["거절 ✗", "status-rejected"];
+
+    return ["진행중 ●", "status-active"];
+}
+
+async function loadProposals() {
+    if (needConnect()) return;
+
+    const count = Number(await dao.getProposalsCount());
+    const list = document.getElementById("proposalList");
+    list.innerHTML = "";
+
+    if (count === 0) {
+        list.innerHTML = "<p style='color:#888; margin-top:10px;'>아직 Proposal이 없습니다.</p>";
+        return;
+    }
+
+    for (let i = count - 1; i >= 0; i--) {
+        const p = await dao.proposals(i);
+        const [statusText, statusClass] = getStatus(p);
+
+        list.innerHTML += `
+        <div class="card">
+            <h3>#${p.id} ${p.title}</h3>
+            <p style="color:#555; margin:4px 0 8px;">${p.description}</p>
+            <p style="font-size:12px; color:#777; word-break:break-all;">제안자: ${p.proposer}</p>
+            <p style="font-size:14px;">
+                찬성: <strong>${p.yesVotes}</strong>
+                &nbsp;/&nbsp;
+                반대: <strong>${p.noVotes}</strong>
+                &nbsp;&nbsp;
+                <span class="status-badge ${statusClass}">${statusText}</span>
+            </p>
+            <div class="vote-buttons">
+                <button class="vote-btn vote-yes" onclick="voteProposal(${p.id}, true)">👍 찬성</button>
+                <button class="vote-btn vote-no" onclick="voteProposal(${p.id}, false)">👎 반대</button>
+            </div>
+            <button class="exec-btn" onclick="executeProposal(${p.id})">Proposal 실행</button>
+        </div>`;
+    }
+}
+
+async function voteProposal(id, support) {
+    if (needConnect()) return;
+
+    try {
+        const tx = await dao.vote(id, support);
+        await tx.wait();
+
+        alert("투표 완료");
+
+        await loadProposals();
+
+    } catch (err) {
+        console.error(err);
+        alert("투표 실패:\n" + (err.shortMessage || err.message));
+    }
+}
+
+async function executeProposal(id) {
+    if (needConnect()) return;
+
+    try {
+        const tx = await dao.executeProposal(id);
+        await tx.wait();
+
+        alert("Proposal 실행 완료");
+
+        await loadProposals();
+
+    } catch (err) {
+        console.error(err);
+        alert("실행 실패:\n" + (err.shortMessage || err.message));
+    }
+}
+
+async function withdrawGeneral() {
+    if (needConnect()) return;
+
+    try {
+        const tx = await dao.withdrawGeneral();
+        await tx.wait();
+
+        alert("일반 후원금 출금 완료");
+
+        await loadMyInfo();
+
+    } catch (err) {
+        console.error(err);
+        alert("일반 후원금 출금 실패:\n" + (err.shortMessage || err.message));
+    }
+}
+
+async function withdrawProposalFund() {
+    if (needConnect()) return;
+
+    const id = document.getElementById("withdrawProposalId").value;
+
+    if (id === "") {
+        alert("Proposal ID를 입력하세요.");
+        return;
+    }
+
+    try {
+        const tx = await dao.withdrawProposalFund(id);
+        await tx.wait();
+
+        alert("Proposal 전용 후원금 출금 완료");
+
+        document.getElementById("withdrawProposalId").value = "";
+
+        await loadMyInfo();
+
+    } catch (err) {
+        console.error(err);
+        alert("Proposal 전용 후원금 출금 실패:\n" + (err.shortMessage || err.message));
+    }
+}
+
+</script>
+</body>
+</html>
