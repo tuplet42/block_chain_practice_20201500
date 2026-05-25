@@ -97,27 +97,16 @@ HTML / CSS / JavaScript 및 ethers.js 기반으로 구성- 출금 요청 저장
 
 ## How to Run
 ### Remix IDE로 컨트랙트 생성
-1. Vulnerability
-   취약한 SimpleDAO 컨트랙트는 withdraw() 함수에서 사용자의 잔액을 차감하기 전에 먼저 ETH를 전송함.
-```solidity
-(bool success, ) = msg.sender.call{value: amount}("");
-require(success, "Transfer failed");
+1. sol 파일을 이용해서 compile -> deploy한다. 이때 MetaMask 지갑을 WalletConnect -> MetaMask로 연결해준다.
+2. Deploy 순서는 CoffeeToken, CreatorSupportDAO 순서로 진행한다. 일단 CoffeeToken을 deploy하고 컨트랙트 주소를 복사해두자.
+3. CreatorSupportDAO를 Deploy한다. 이때 복사해둔 CoffeeToken 컨트랙트 주소를 tokenAddress에 붙여넣기 후 진행해야 한다.
+4. Deployed Contracts에 CoffeeToken으로 들어가서 TransferOwnership에 CreatorSupportDAO 컨트랙트 주소를 넣는다.
+<img width="279" height="730" alt="remix1_token_and_DAO" src="https://github.com/user-attachments/assets/878341a0-8928-4bc9-a42e-00a9d52bf658" />
+<img width="637" height="618" alt="coffeetoken_transferownership" src="https://github.com/user-attachments/assets/bcbc47f0-3781-4fd5-a685-731e7eb79ff5" />
 
-balances[msg.sender] -= amount;
-```
-  이 구조에서는 공격 컨트랙트가 ETH 받는 순간 receive() 함수에서 다시 withdraw() 호출 가능.
-  즉, 잔액이 차감되지 전에 반복 출금이 가능해짐.
+### 
 
-2. Attack Flow
-   1) SimpleDAO 배포
-   2) DAO에 10ETH 입금
-   3) AttackDAO 배포
-   4) 공격 컨트랙트가 1ETH를 deposit
-   5) withdraw() 호출
-   6) receive()에서 재귀적으로 withdraw() 재호출
-   7) DAO 자금 drain
-
-3. Result
+6. Result
 DAO에 있던 10ETH와 공격지가 deposit한 1ETH까지 총 11ETH가 공격 컨트랙트로 이동하였다.
 - deploy.js 실행
 <img width="535" height="120" alt="deployjs실행결과" src="https://github.com/user-attachments/assets/35a6bd8c-375c-444d-b3eb-f82e077c9e28" />
