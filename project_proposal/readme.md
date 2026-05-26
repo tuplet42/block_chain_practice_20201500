@@ -146,5 +146,8 @@ HTML / CSS / JavaScript 및 ethers.js 기반으로 구성- 출금 요청 저장
 2. 일반출금의 경우 일반 후원금 출금으로 바로 출금이 가능하고, Proposal 전용 출금의 경우 실행완료된 Proposal ID를 입력하고 출금이 가능하다.
 <img width="1418" height="288" alt="일반출금" src="https://github.com/user-attachments/assets/57e93241-15cf-4516-bac4-6b3364a75ca5" />
 
-3. 일반출금과 Proposal 전용 출금을 하면 아래와 같이 컨트랙트에 쌓여있던 ETH가 계좌로 송금된 것을 확인할 수 있다.
+3. 일반출금과 Proposal 전용 출금을 하면 아래와 같이 컨트랙트에 쌓여있던 ETH가 프론트엔드 상으로 다 빠진 것을 확인할 수 있다.
 <img width="1051" height="273" alt="withdraw후" src="https://github.com/user-attachments/assets/c6e29b66-6473-4047-9ae7-8194b669309f" />
+
+## Self Feedback
+- Proposal 전용 withdraw나 후원을 후원하고자 Proposal ID를 정해서 하도록 하면 어떤 Proposal에 얼마나 돈이 쌓였고, 쌓여있는 Proposal 전용 후원금에서 그만큼의 돈을 출금할 수 있을 것이다. 
