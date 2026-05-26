@@ -20,6 +20,13 @@
 - Parity Wallet Hack #2 - Library Selfdestruct / Frozen Funds
 이를 해결하기 위해 일반 후원가 Proposal 전용 후원을 분리하고, Proposal 및 투표 시스템을 도입하여 후원자가 자금 사용 방향에 참여할 수 있도록 설계하였습니다.
 
+### 지난 발표와의 변경점
+'일반 후원금과 Proposal 전용 후원금을 별도 balance로 관리한다'고 설명 가능하다. 
+- 후원금 사용 목적에 따라 일반 후원과 Proposal 전용 후원 분리하여 Proposal에서만 후원금을 사용하도록 할 수 있다.
+- Proposal 전용 후원으로 후원된 경우 Proposal이 실행 완료된 상태일 때 출금 가능하다.
+- Proposal 생성 시 구체적으로 10 COFFEE 토큰을 소모하도록 하여 무분별한 제안 생성을 방지했다.
+- 이외에도 VIP 조건을 기존의 5ETH는 너무 큰 것 같아 1ETH로 완화하였다.
+
 ## 기술스택
 - Solidity
 - OpenZeppelin
