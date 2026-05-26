@@ -131,7 +131,7 @@ HTML / CSS / JavaScript 및 ethers.js 기반으로 구성- 출금 요청 저장
 2. 매번 Proposal을 만들 때마다 10 CoffeeToken을 사용하여 Proposal 생성을 눌러서 생성이 가능하다.
 <img width="906" height="399" alt="proposal생성" src="https://github.com/user-attachments/assets/508fbce1-1dc2-47e8-94c0-f9c4a2c9f56b" />
 
-3. Proposal의 경우 진행중, 통과/거절, 실행 완료의 상태가 있고 투표를 통해 찬성/반대로 표를 던질 수 있다.
+3. Proposal의 경우 진행중, 통과/거절, 실행 완료의 상태가 있고 투표를 통해 찬성/반대로 표를 던질 수 있다. 한번 투표하면 다른 의견으로 투표가 불가능하다.
 4. 찬성 상태일 때 Proposal 실행 시 실행 완료 상태가 된다.
 <img width="1024" height="934" alt="proposal상태와목록" src="https://github.com/user-attachments/assets/aa5d9293-10f2-4272-a358-f7754a75ec9d" />
 
