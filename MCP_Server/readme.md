@@ -228,23 +228,32 @@ http://127.0.0.1:8765
 
 Web UI에서 확인할 수 있는 기능은 다음과 같습니다.
 
-* Tool 목록 조회
-* Upbit 마켓 코드 검색
-* 초보자용 코인 요약 조회
-* 호가창 조회
-* 여러 코인 비교
+* Tool 목록 조회 
+<img width="598" height="694" alt="image" src="https://github.com/user-attachments/assets/f5cc50de-6b0b-48e0-bd17-4ee26513651d" />
 
-<!-- 캡처 위치 4: 웹에서 Tool 목록 조회 결과 -->
 
-<!-- 추천 파일명: assets/screenshots/web-tool-discovery.png -->
+* Upbit 마켓 코드 검색 - 빠르게 찾을 수 있도록 비트코인, 이더리움, 리플(XRP)를 설정했으나 도지코인 등 다른 코인들도 검색할 수 있고, 그 결과를 아래의 결과창에서 확인할 수 있습니다.
+<img width="1193" height="437" alt="image" src="https://github.com/user-attachments/assets/2c7eb46c-52dd-41ea-b970-1c618b9d2353" />
+<img width="1196" height="434" alt="image" src="https://github.com/user-attachments/assets/b2677b3e-8144-420a-80c7-c73e9ce7164b" />
+<img width="1205" height="439" alt="image" src="https://github.com/user-attachments/assets/5e8758d4-1f22-4c75-8196-e4479e7c1399" />
+<img width="1194" height="437" alt="image" src="https://github.com/user-attachments/assets/ad0742f9-1e49-492d-b79c-6fd3b4cfdeb0" />
 
-![Web Tool Discovery](assets/screenshots/web-tool-discovery.png)
 
-<!-- 캡처 위치 5: 웹에서 BTC 요약 결과 -->
+* 초보자용 코인 요약 조회 - BTC, ETH, XRP, SOL, DOGE, ADA의 6개 코인에 대해 요약조회를 할 수 있고, 그 결과를 아래의 결과창에서 확인할 수 있습니다. 이 예시는 BTC 요약 조회 결과입니다.
+<img width="590" height="386" alt="image" src="https://github.com/user-attachments/assets/60ddc983-60fa-4cbb-8bd6-84cdb93aaad6" />
+<img width="1174" height="817" alt="image" src="https://github.com/user-attachments/assets/1c62988f-0ef1-4699-9a4b-679a08b4f08a" />
 
-<!-- 추천 파일명: assets/screenshots/web-summary-result.png -->
 
-![Web Summary Result](assets/screenshots/web-summary-result.png)
+* 호가창 조회 - 원하는 코인의 마켓 코드를 입력하고, 호가 단계를 입력하여 조회할 수 있습니다. 디폴트 호가 단계는 5이며, 그 결과를 아래의 결과창에서 확인할 수 있습니다. 이 예시는 BTC의 호가창 결과입니다.
+<img width="598" height="385" alt="image" src="https://github.com/user-attachments/assets/99cf3f34-3d30-4d42-a2fb-e4a7311a1f47" />
+<img width="1161" height="403" alt="image" src="https://github.com/user-attachments/assets/d29a9301-6d9a-4598-8c09-1d107b7fbd12" />
+
+
+* 여러 코인 비교 - 비교하고픈 코인의 마켓 코드를 BTC, ETH, XRP, SOL, DOGE, ADA의 6개 코인에 대해 입력해서 비교할 수 있습니다. 그 결과를 아래의 결과창에서 확인할 수 있고, 이 예시는 전부 입력했을 때의 결과입니다.
+<img width="1197" height="768" alt="image" src="https://github.com/user-attachments/assets/c64927b2-b754-438c-a0e0-2404e2f3320a" />
+
+* 빠른 실행 - 아래의 사진처럼 코인을 선택해서 선택 코인에 대해 요약, 호가창을 확인할 수 있고, 주요 코인으로 설정해둔 비트코인, 이더리움, 솔라나를 비교한 주요 코인 비교를 확인할 수 있습니다. 마찬가지로 결과창에서 확인 가능합니다.
+<img width="182" height="111" alt="image" src="https://github.com/user-attachments/assets/e41304db-a057-4f6f-b023-736bd94cab5f" />
 
 ---
 
@@ -252,7 +261,7 @@ Web UI에서 확인할 수 있는 기능은 다음과 같습니다.
 
 본 프로젝트는 실제 LLM API를 연결하지 않고, MCP Client가 LLM Host 역할을 대신하여 tool을 직접 호출하는 방식으로 구현했습니다.
 
-다만 실제 LLM과 연결할 경우 다음과 같은 자연어 질의를 MCP tool 호출로 변환할 수 있습니다.
+다만 실제 LLM과 연결할 경우 다음과 같은 자연어 질의를 MCP tool 호출로 변환할 수 있을 것입니다.
 
 | 자연어 질의                | 호출되는 MCP Tool                                              |
 | --------------------- | ---------------------------------------------------------- |
@@ -261,53 +270,6 @@ Web UI에서 확인할 수 있는 기능은 다음과 같습니다.
 | “비트코인 호가창 5단계 보여줘”    | `get_upbit_orderbook(market="KRW-BTC", depth=5)`           |
 | “비트코인, 이더리움, 리플 비교해줘” | `compare_upbit_markets(markets="KRW-BTC,KRW-ETH,KRW-XRP")` |
 | “이더리움 마켓 코드 찾아줘”      | `search_upbit_market(keyword="이더리움", quote="KRW")`         |
-
----
-
-## 11. 실행 결과 예시
-
-### 11-1. Tool Discovery
-
-CLI Client가 MCP Server에 연결하면 다음과 같이 tool 목록을 조회합니다.
-
-```text
-[2/3] Tool discovery
-1. search_upbit_market
-2. get_upbit_orderbook
-3. get_beginner_coin_summary
-4. compare_upbit_markets
-```
-
-### 11-2. 초보자용 요약 결과 예시
-
-```text
-KRW-BTC 초보자용 요약
-
-1. 기본 정보
-- 코인명: 비트코인 / Bitcoin
-- 마켓 코드: KRW-BTC
-- 현재가: ...
-
-2. 24시간 시세 정보
-- 전일 대비 변동률: ...
-- 24시간 거래대금: ...
-
-3. 호가 요약
-- 최우선 매도호가: ...
-- 최우선 매수호가: ...
-- 호가 스프레드: ...
-
-4. 시장 경보 정보
-- 유의/주의 정보: 해당 없음
-
-5. 초보자 해석
-- 마켓 코드 설명: KRW-BTC는 원화(KRW)로 비트코인(BTC, Bitcoin)을 거래하는 마켓입니다.
-- 가격 흐름: 전일 종가보다 ...한 상태입니다.
-- 거래 활발도: ...
-- 호가 해석: 바로 매수하려면 최우선 매도호가를, 바로 매도하려면 최우선 매수호가를 참고할 수 있습니다.
-- 스프레드 해석: ...
-- 24시간 가격 위치: ...
-```
 
 ---
 
