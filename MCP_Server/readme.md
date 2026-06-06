@@ -102,13 +102,8 @@ finalproject/
 │   └── server.py
 ├── clients/
 │   └── mcp_client.py
-├── web/
-│   └── index.html
-└── assets/
-    └── screenshots/
-        ├── cli-tool-discovery.png
-        ├── cli-tool-call.png
-        └── web-ui-main.png
+└── web/
+    └── index.html
 ```
 
 | 경로                      | 설명                                                          |
@@ -200,18 +195,21 @@ MCP Server가 제공하는 tool 목록 출력
 [3/3] Tool call 실행
 각 tool 호출 결과 출력
 ```
+<img width="580" height="250" alt="image" src="https://github.com/user-attachments/assets/feafb6c3-264e-4ef8-ae4f-0d2ca0817699" />
 
 <!-- 캡처 위치 2: CLI에서 Tool discovery가 보이는 부분 -->
 
 <!-- 추천 파일명: assets/screenshots/cli-tool-discovery.png -->
 
-![CLI Tool Discovery](assets/screenshots/cli-tool-discovery.png)
+<img width="776" height="514" alt="image" src="https://github.com/user-attachments/assets/3edc3d4c-a627-4518-991d-f21051807e9c" />
+
 
 <!-- 캡처 위치 3: CLI에서 get_beginner_coin_summary 또는 get_upbit_orderbook 결과가 보이는 부분 -->
 
 <!-- 추천 파일명: assets/screenshots/cli-tool-call.png -->
 
-![CLI Tool Call Result](assets/screenshots/cli-tool-call.png)
+<img width="559" height="370" alt="image" src="https://github.com/user-attachments/assets/781f7708-48bc-4393-a2e7-56728d93f482" />
+
 
 ---
 
