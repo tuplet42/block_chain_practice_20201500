@@ -113,7 +113,6 @@ finalproject/
 | `web_app.py`            | Web UI 요청을 받아 MCP ClientSession을 실행하는 Starlette Backend     |
 | `web/index.html`        | 브라우저 기반 데모 화면                                               |
 | `pyproject.toml`        | 프로젝트 의존성 및 Python 버전 설정                                     |
-| `assets/screenshots/`   | 실행 결과 캡처 저장 폴더                                              |
 
 ---
 
@@ -389,5 +388,3 @@ uv run uvicorn web_app:app --host 127.0.0.1 --port 8766
 ```text
 http://127.0.0.1:8766
 ```
-* Upbit 시세 데이터를 초보자가 이해하기 쉬운 형태로 가공할 수 있음
-
