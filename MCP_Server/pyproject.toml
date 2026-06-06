@@ -1,0 +1,11 @@
+[project]
+name = "upbit-beginner-mcp"
+version = "0.1.0"
+description = "Upbit beginner-friendly MCP server"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "mcp",
+    "httpx",
+    "starlette",
+    "uvicorn",
+]
