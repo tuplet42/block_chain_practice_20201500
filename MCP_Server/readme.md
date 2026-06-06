@@ -295,6 +295,7 @@ Web UI에서 확인할 수 있는 기능은 다음과 같습니다.
 ### 13-1. 잘못된 마켓 코드
 
 잘못된 마켓 코드를 입력하면 아래의 예시처럼 안내합니다.
+
 <img width="604" height="390" alt="image" src="https://github.com/user-attachments/assets/9d97a1f7-0569-4128-839a-e82f45c88b09" />
 <img width="1200" height="433" alt="image" src="https://github.com/user-attachments/assets/4e090624-ca57-4a0f-bd0d-8e06833ee47a" />
 
@@ -302,6 +303,7 @@ Web UI에서 확인할 수 있는 기능은 다음과 같습니다.
 ### 13-2. 검색 결과가 없는 경우
 
 검색어에 해당하는 마켓이 없으면 아래의 예시처럼 안내합니다.
+
 <img width="603" height="405" alt="image" src="https://github.com/user-attachments/assets/2eeff169-2dd3-4f50-beb8-104a67d737b8" />
 <img width="1204" height="432" alt="image" src="https://github.com/user-attachments/assets/c0114b65-333a-4241-866c-d821646f82ac" />
 
