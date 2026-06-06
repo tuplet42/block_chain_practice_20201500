@@ -294,22 +294,17 @@ Web UI에서 확인할 수 있는 기능은 다음과 같습니다.
 
 ### 13-1. 잘못된 마켓 코드
 
-잘못된 마켓 코드를 입력하면 현재가 또는 호가 정보를 찾지 못했다는 메시지를 반환합니다.
+잘못된 마켓 코드를 입력하면 아래의 예시처럼 안내합니다.
+<img width="604" height="390" alt="image" src="https://github.com/user-attachments/assets/9d97a1f7-0569-4128-839a-e82f45c88b09" />
+<img width="1200" height="433" alt="image" src="https://github.com/user-attachments/assets/4e090624-ca57-4a0f-bd0d-8e06833ee47a" />
 
-예:
-
-```text
-현재가 정보를 찾지 못했습니다: KRW-UNKNOWN
-```
 
 ### 13-2. 검색 결과가 없는 경우
 
-검색어에 해당하는 마켓이 없으면 예시 입력을 함께 안내합니다.
+검색어에 해당하는 마켓이 없으면 아래의 예시처럼 안내합니다.
+<img width="603" height="405" alt="image" src="https://github.com/user-attachments/assets/2eeff169-2dd3-4f50-beb8-104a67d737b8" />
+<img width="1204" height="432" alt="image" src="https://github.com/user-attachments/assets/c0114b65-333a-4241-866c-d821646f82ac" />
 
-```text
-'abc'에 해당하는 KRW 마켓을 찾지 못했습니다.
-예시 입력: 비트코인, bitcoin, BTC, 이더리움, ETH
-```
 
 ### 13-3. API Key
 
