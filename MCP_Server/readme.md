@@ -85,9 +85,9 @@ Web UI에서는 브라우저가 MCP Server에 직접 연결하지 않습니다.
 대신 `web_app.py`가 Starlette 기반 Web Backend로 동작하며, 내부에서 MCP ClientSession을 생성하여 MCP Server의 tool을 호출합니다.
 아래의 이미지는 전체적인 Web UI입니다.
 <!-- 캡처 위치 1: Web UI 전체 화면 캡처 -->
-<img width="1441" height="766" alt="image" src="https://github.com/user-attachments/assets/dfe44b89-24b2-426d-826f-86ec8a389d3f" />
-<img width="1202" height="541" alt="image" src="https://github.com/user-attachments/assets/850f9920-20c4-492b-80a1-85476aedf63e" />
-<img width="1214" height="375" alt="image" src="https://github.com/user-attachments/assets/ed3856be-1aff-428d-945e-e97047aa395e" />
+<img width="1381" height="817" alt="image" src="https://github.com/user-attachments/assets/af6b315c-8438-480e-b49a-e666493a9342" />
+<img width="1245" height="717" alt="image" src="https://github.com/user-attachments/assets/27007bc0-6153-40e4-ae9f-2497ce3569f6" />
+<img width="1190" height="442" alt="image" src="https://github.com/user-attachments/assets/eb7c2f17-2740-4bc2-9c07-04e2d042f115" />
 
 ---
 
